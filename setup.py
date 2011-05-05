@@ -22,7 +22,7 @@ def build_package(dirpath, dirnames, filenames):
 
 setup(
     name='armstrong.dev',
-    version='0.0.1a',
+    version='1.0.0a',
     description='Tools needed for development and testing of Armstrong',
     author='Bay Citizen and Texas Tribune',
     author_email='all@armstrongcms.org',
