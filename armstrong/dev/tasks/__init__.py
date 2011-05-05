@@ -59,16 +59,19 @@ def html_coverage_report(directory="./coverage"):
 
 @task
 def clean():
+    """Find and remove all .pyc and .pyo files"""
     local('find . -name "*.py[co]" -exec rm {} \;')
 
 
 @task
 def create_migration(name):
+    """Create a migration for provided app -- requires South"""
     command((("schemamigration", fabfile.main_app, name), {"initial": True}))
 
 
 @task
 def command(*cmds):
+    """Run and arbitrary set of Django commands"""
     from d51.django.virtualenv.base import VirtualEnvironment
     runner = VirtualEnvironment()
     runner.run(fabfile.settings)
@@ -83,25 +86,30 @@ def command(*cmds):
 
 @task
 def pep8():
+    """Run pep8 on all .py files in ./armstrong"""
     local('find ./armstrong -name "*.py" | xargs pep8', capture=False)
 
 
 @task
 def test():
+    """Run tests against `tested_apps`"""
     with html_coverage_report():
         run_tests(fabfile.settings, *fabfile.tested_apps)
 
 
 @task
 def runserver():
+    """Create a Django development server"""
     command("runserver")
 
 
 @task
 def shell():
+    """Launch shell with same settings as test and runserver"""
     command("shell")
 
 
 @task
 def syncdb():
+    """Call syncdb and migrate on project"""
     command("syncdb", "migrate")
