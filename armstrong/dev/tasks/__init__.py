@@ -32,8 +32,8 @@ except ImportError, e:
 FABRIC_TASK_MODULE = True
 
 
-__all__ = ["clean", "command", "create_migration", "pep8", "test", "runserver",
-           "shell", "spec", "syncdb", ]
+__all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
+           "runserver", "shell", "spec", "syncdb", ]
 
 @contextmanager
 def html_coverage_report(directory="./coverage"):
@@ -114,6 +114,12 @@ def shell():
 def syncdb():
     """Call syncdb and migrate on project"""
     command("syncdb", "migrate")
+
+
+@task
+def docs():
+    """Generate the Sphinx docs for this project"""
+    local("cd docs && make html")
 
 
 @task
