@@ -11,6 +11,7 @@ import os
 from os.path import basename, dirname
 import sys
 
+from d51.django.virtualenv.base import VirtualEnvironment
 from fabric.api import *
 from fabric.decorators import task
 
@@ -32,7 +33,7 @@ FABRIC_TASK_MODULE = True
 
 
 __all__ = ["clean", "command", "create_migration", "pep8", "test", "runserver",
-           "shell", "syncdb", ]
+           "shell", "spec", "syncdb", ]
 
 @contextmanager
 def html_coverage_report(directory="./coverage"):
@@ -113,3 +114,20 @@ def shell():
 def syncdb():
     """Call syncdb and migrate on project"""
     command("syncdb", "migrate")
+
+
+@task
+def spec(verbosity=4):
+    """Run harvest to run all of the Lettuce specs"""
+    defaults = {"DATABASES": {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        },
+    }}
+    defaults.update(fabfile.settings)
+    v = VirtualEnvironment()
+    v.run(defaults)
+    v.call_command("syncdb", interactive=False)
+    v.call_command("harvest", apps=fabfile.full_name,
+            verbosity=verbosity)
