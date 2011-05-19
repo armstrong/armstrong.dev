@@ -18,17 +18,19 @@ def build_package(dirpath, dirnames, filenames):
         pkg = pkg.replace(os.path.altsep, '.')
     packages.append(pkg)
 
-[build_package(dirpath, dirnames, filenames) for dirpath, dirnames, filenames in os.walk('armstrong')]
+[build_package(dirpath, dirnames, filenames) for dirpath, dirnames, filenames
+        in os.walk('armstrong/dev')]
 
 setup(
     name='armstrong.dev',
-    version='1.0.0a',
+    version='1.0.1',
     description='Tools needed for development and testing of Armstrong',
     author='Bay Citizen and Texas Tribune',
-    author_email='all@armstrongcms.org',
+    author_email='dev@armstrongcms.org',
     url='http://github.com/armstrongcms/armstrong.dev/',
     # TODO: generate this dynamically
     packages=packages,
+    namespace_packages=["armstrong", "armstrong.dev", ],
     install_requires=[
         # TODO: add this as a concrete dependency once 1.1 is out
         #'fabric',
