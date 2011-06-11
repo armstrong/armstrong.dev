@@ -27,7 +27,7 @@ setup(
     description='Tools needed for development and testing of Armstrong',
     author='Bay Citizen and Texas Tribune',
     author_email='dev@armstrongcms.org',
-    url='http://github.com/armstrongcms/armstrong.dev/',
+    url='http://github.com/armstrong/armstrong.dev/',
     # TODO: generate this dynamically
     packages=packages,
     namespace_packages=["armstrong", "armstrong.dev", ],
