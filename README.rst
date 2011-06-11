@@ -38,7 +38,7 @@ Installation
 ::
 
     name="armstrong.dev"
-    pip install -e git://github.com/armstrongcms/$name#egg=$name
+    pip install -e git://github.com/armstrong/$name#egg=$name
 
 **Note**: This currently relies on a development version of Fabric.  This
 requirement is set to be dropped once Fabric 1.1 is released.  To ensure this
