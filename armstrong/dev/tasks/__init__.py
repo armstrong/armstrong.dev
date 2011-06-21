@@ -10,6 +10,7 @@ except ImportError:
 import os
 from os.path import basename, dirname
 import sys
+from functools import wraps
 
 from d51.django.virtualenv.base import VirtualEnvironment
 from fabric.api import *
@@ -34,6 +35,16 @@ FABRIC_TASK_MODULE = True
 
 __all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
            "runserver", "shell", "spec", "syncdb", ]
+
+
+def possibly_pip_install(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        if getattr(fabfile, "pip_install_first", False):
+            local("pip install -I .", capture=False)
+        func(*args, **kwargs)
+    return inner
+
 
 @contextmanager
 def html_coverage_report(directory="./coverage"):
@@ -92,6 +103,7 @@ def pep8():
 
 
 @task
+@possibly_pip_install
 def test():
     """Run tests against `tested_apps`"""
     with html_coverage_report():
@@ -123,6 +135,7 @@ def docs():
 
 
 @task
+@possibly_pip_install
 def spec(verbosity=4):
     """Run harvest to run all of the Lettuce specs"""
     defaults = {"DATABASES": {
