@@ -41,7 +41,7 @@ def possibly_pip_install(func):
     @wraps(func)
     def inner(*args, **kwargs):
         if getattr(fabfile, "pip_install_first", False):
-            local("pip install -I .", capture=False)
+            local("pip install --no-deps -I .", capture=False)
         func(*args, **kwargs)
     return inner
 
