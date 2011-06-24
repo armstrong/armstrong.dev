@@ -14,6 +14,7 @@ from functools import wraps
 
 from d51.django.virtualenv.base import VirtualEnvironment
 from fabric.api import *
+from fabric.colors import red
 from fabric.decorators import task
 
 if not "fabfile" in sys.modules:
@@ -144,6 +145,14 @@ def spec(verbosity=4):
             "NAME": ":memory:",
         },
     }}
+
+    if not hasattr(fabfile, "full_name"):
+        sys.stderr.write("\n".join([
+            red("No `full_name` variable detected in your fabfile!"),
+            red("Please set `full_name` to the app's full module"),
+        ]))
+        sys.stderr.flush()
+        sys.exit(1)
     defaults.update(fabfile.settings)
     v = VirtualEnvironment()
     v.run(defaults)
