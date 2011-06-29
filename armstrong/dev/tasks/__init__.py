@@ -12,7 +12,8 @@ from os.path import basename, dirname
 import sys
 from functools import wraps
 
-from d51.django.virtualenv.base import VirtualEnvironment
+from armstrong.dev.virtualenv.base import VirtualEnvironment
+from armstrong.dev.virtualenv.test_runner import run_tests
 from fabric.api import *
 from fabric.colors import red
 from fabric.decorators import task
@@ -21,14 +22,6 @@ if not "fabfile" in sys.modules:
     sys.stderr.write("This expects to have a 'fabfile' module\n")
     sys.stderr.write(-1)
 fabfile = sys.modules["fabfile"]
-
-
-try:
-    from d51.django.virtualenv.test_runner import run_tests
-except ImportError, e:
-    sys.stderr.write(
-            "This project requires d51.django.virtualenv.test_runner\n")
-    sys.exit(-1)
 
 
 FABRIC_TASK_MODULE = True
@@ -85,7 +78,6 @@ def create_migration(name):
 @task
 def command(*cmds):
     """Run and arbitrary set of Django commands"""
-    from d51.django.virtualenv.base import VirtualEnvironment
     runner = VirtualEnvironment()
     runner.run(fabfile.settings)
     for cmd in cmds:
