@@ -39,7 +39,7 @@ def possibly_pip_install(func):
     def inner(*args, **kwargs):
         if getattr(fabfile, "pip_install_first", True):
             with settings(warn_only=True):
-                local("pip uninstall %s" % get_full_name(), capture=False)
+                local("pip uninstall -y %s" % get_full_name(), capture=False)
                 local("pip install --no-deps .", capture=False)
         func(*args, **kwargs)
     return inner

@@ -4,7 +4,7 @@
     "description": "Tools needed for development and testing of Armstrong",
     "install_requires": [
         "south == 0.7.3",
-        "fabric == 1.1.0",
+        "fabric == 1.1.1",
         "coverage",
         "fudge"
     ]
