@@ -1,3 +1,4 @@
+
 from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
@@ -12,23 +13,18 @@ from os.path import basename, dirname
 import sys
 from functools import wraps
 
-from d51.django.virtualenv.base import VirtualEnvironment
+
 from fabric.api import *
 from fabric.colors import red
 from fabric.decorators import task
+
+from armstrong.dev.virtualdjango.test_runner import run_tests
+from armstrong.dev.virtualdjango.base import VirtualDjango
 
 if not "fabfile" in sys.modules:
     sys.stderr.write("This expects to have a 'fabfile' module\n")
     sys.stderr.write(-1)
 fabfile = sys.modules["fabfile"]
-
-
-try:
-    from d51.django.virtualenv.test_runner import run_tests
-except ImportError, e:
-    sys.stderr.write(
-            "This project requires d51.django.virtualenv.test_runner\n")
-    sys.exit(-1)
 
 
 FABRIC_TASK_MODULE = True
@@ -41,8 +37,10 @@ __all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
 def possibly_pip_install(func):
     @wraps(func)
     def inner(*args, **kwargs):
-        if getattr(fabfile, "pip_install_first", False):
-            local("pip install --no-deps -I .", capture=False)
+        if getattr(fabfile, "pip_install_first", True):
+            with settings(warn_only=True):
+                local("pip uninstall -y %s" % get_full_name(), capture=False)
+                local("pip install --no-deps .", capture=False)
         func(*args, **kwargs)
     return inner
 
@@ -85,8 +83,7 @@ def create_migration(name):
 @task
 def command(*cmds):
     """Run and arbitrary set of Django commands"""
-    from d51.django.virtualenv.base import VirtualEnvironment
-    runner = VirtualEnvironment()
+    runner = VirtualDjango()
     runner.run(fabfile.settings)
     for cmd in cmds:
         if type(cmd) is tuple:
@@ -146,16 +143,21 @@ def spec(verbosity=4):
         },
     }}
 
-    if not hasattr(fabfile, "full_name"):
-        sys.stderr.write("\n".join([
-            red("No `full_name` variable detected in your fabfile!"),
-            red("Please set `full_name` to the app's full module"),
-        ]))
-        sys.stderr.flush()
-        sys.exit(1)
+    get_full_name()
     defaults.update(fabfile.settings)
-    v = VirtualEnvironment()
+    v = VirtualDjango()
     v.run(defaults)
     v.call_command("syncdb", interactive=False)
     v.call_command("harvest", apps=fabfile.full_name,
             verbosity=verbosity)
+
+def get_full_name():
+    if not hasattr(fabfile, "full_name"):
+        sys.stderr.write("\n".join([
+            red("No `full_name` variable detected in your fabfile!"),
+            red("Please set `full_name` to the app's full module"),
+            ""
+        ]))
+        sys.stderr.flush()
+        sys.exit(1)
+    return fabfile.full_name
