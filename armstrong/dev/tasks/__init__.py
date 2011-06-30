@@ -13,6 +13,7 @@ from os.path import basename, dirname
 import sys
 from functools import wraps
 
+import json
 
 from fabric.api import *
 from fabric.colors import red
@@ -153,11 +154,18 @@ def spec(verbosity=4):
 
 def get_full_name():
     if not hasattr(fabfile, "full_name"):
-        sys.stderr.write("\n".join([
-            red("No `full_name` variable detected in your fabfile!"),
-            red("Please set `full_name` to the app's full module"),
-            ""
-        ]))
-        sys.stderr.flush()
-        sys.exit(1)
+        try:
+            package_string = local("cat ./package.json", capture=True)
+            package_obj = json.loads(package_string)
+            fabfile.full_name = package_obj['name']
+            return fabfile.full_name
+        except:
+            sys.stderr.write("\n".join([
+                red("No `full_name` variable detected in your fabfile!"),
+                red("Please set `full_name` to the app's full module"),
+                red("Additionally, we couldn't read name from package.json"),
+                ""
+            ]))
+            sys.stderr.flush()
+            sys.exit(1)
     return fabfile.full_name
