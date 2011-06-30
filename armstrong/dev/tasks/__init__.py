@@ -1,3 +1,4 @@
+
 from pkgutil import extend_path
 __path__ = extend_path(__path__, __name__)
 
@@ -12,11 +13,13 @@ from os.path import basename, dirname
 import sys
 from functools import wraps
 
-from armstrong.dev.virtualenv.base import VirtualEnvironment
-from armstrong.dev.virtualenv.test_runner import run_tests
+
 from fabric.api import *
 from fabric.colors import red
 from fabric.decorators import task
+
+from armstrong.dev.virtualdjango.test_runner import run_tests
+from armstrong.dev.virtualdjango.base import VirtualDjango
 
 if not "fabfile" in sys.modules:
     sys.stderr.write("This expects to have a 'fabfile' module\n")
@@ -78,7 +81,7 @@ def create_migration(name):
 @task
 def command(*cmds):
     """Run and arbitrary set of Django commands"""
-    runner = VirtualEnvironment()
+    runner = VirtualDjango()
     runner.run(fabfile.settings)
     for cmd in cmds:
         if type(cmd) is tuple:
@@ -146,7 +149,7 @@ def spec(verbosity=4):
         sys.stderr.flush()
         sys.exit(1)
     defaults.update(fabfile.settings)
-    v = VirtualEnvironment()
+    v = VirtualDjango()
     v.run(defaults)
     v.call_command("syncdb", interactive=False)
     v.call_command("harvest", apps=fabfile.full_name,
