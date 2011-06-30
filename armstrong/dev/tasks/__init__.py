@@ -37,8 +37,10 @@ __all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
 def possibly_pip_install(func):
     @wraps(func)
     def inner(*args, **kwargs):
-        if getattr(fabfile, "pip_install_first", False):
-            local("pip install --no-deps -I .", capture=False)
+        if getattr(fabfile, "pip_install_first", True):
+            with settings(warn_only=True):
+                local("pip uninstall %s" % get_full_name(), capture=False)
+                local("pip install --no-deps .", capture=False)
         func(*args, **kwargs)
     return inner
 
@@ -141,16 +143,21 @@ def spec(verbosity=4):
         },
     }}
 
-    if not hasattr(fabfile, "full_name"):
-        sys.stderr.write("\n".join([
-            red("No `full_name` variable detected in your fabfile!"),
-            red("Please set `full_name` to the app's full module"),
-        ]))
-        sys.stderr.flush()
-        sys.exit(1)
+    get_full_name()
     defaults.update(fabfile.settings)
     v = VirtualDjango()
     v.run(defaults)
     v.call_command("syncdb", interactive=False)
     v.call_command("harvest", apps=fabfile.full_name,
             verbosity=verbosity)
+
+def get_full_name():
+    if not hasattr(fabfile, "full_name"):
+        sys.stderr.write("\n".join([
+            red("No `full_name` variable detected in your fabfile!"),
+            red("Please set `full_name` to the app's full module"),
+            ""
+        ]))
+        sys.stderr.flush()
+        sys.exit(1)
+    return fabfile.full_name
