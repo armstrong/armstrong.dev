@@ -59,7 +59,6 @@ def html_coverage_report(directory="./coverage"):
 
     if coverage:
         cov.stop()
-        print 'there'
         try:
             cov.html_report(directory=directory)
         except coverage_api.misc.CoverageException as e:
