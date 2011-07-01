@@ -59,10 +59,7 @@ def html_coverage_report(directory="./coverage"):
 
     if coverage:
         cov.stop()
-        try:
-            cov.html_report(directory=directory)
-        except coverage.misc.CoverageException as e:
-            print "Coverage Exception: %s" % e
+        cov.html_report(directory=directory)
     else:
         print "Install coverage.py to measure test coverage"
 
