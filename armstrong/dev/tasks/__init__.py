@@ -5,9 +5,9 @@ __path__ = extend_path(__path__, __name__)
 
 from contextlib import contextmanager
 try:
-    import coverage as coverage_api
+    import coverage as coverage
 except ImportError:
-    coverage_api = False
+    coverage = False
 import os
 from os.path import basename, dirname
 import sys
@@ -48,12 +48,12 @@ def pip_install(func):
 def html_coverage_report(directory="./coverage"):
     # This relies on this being run from within a directory named the same as
     # the repository on GitHub.  It's fragile, but for our purposes, it works.
-    if coverage_api:
+    if coverage:
         local('rm -rf ' + directory)
         package = __import__('site')
         base_path = dirname(package.__file__) + '/site-packages/' + get_full_name().replace('.', '/')
         print "Coverage is covering: " + base_path
-        cov = coverage_api.coverage(branch=True, source=(base_path,))
+        cov = coverage.coverage(branch=True, source=(base_path,))
         cov.start()
     yield
 
@@ -61,7 +61,7 @@ def html_coverage_report(directory="./coverage"):
         cov.stop()
         try:
             cov.html_report(directory=directory)
-        except coverage_api.misc.CoverageException as e:
+        except coverage.misc.CoverageException as e:
             print "Coverage Exception: %s" % e
     else:
         print "Install coverage.py to measure test coverage"
