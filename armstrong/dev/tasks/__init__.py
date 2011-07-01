@@ -5,9 +5,9 @@ __path__ = extend_path(__path__, __name__)
 
 from contextlib import contextmanager
 try:
-    import coverage
+    import coverage as coverage_api
 except ImportError:
-    coverage = False
+    coverage_api = False
 import os
 from os.path import basename, dirname
 import sys
@@ -34,8 +34,7 @@ FABRIC_TASK_MODULE = True
 __all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
            "runserver", "shell", "spec", "syncdb", ]
 
-
-def possibly_pip_install(func):
+def pip_install(func):
     @wraps(func)
     def inner(*args, **kwargs):
         if getattr(fabfile, "pip_install_first", True):
@@ -45,26 +44,26 @@ def possibly_pip_install(func):
         func(*args, **kwargs)
     return inner
 
-
 @contextmanager
 def html_coverage_report(directory="./coverage"):
     # This relies on this being run from within a directory named the same as
     # the repository on GitHub.  It's fragile, but for our purposes, it works.
-    if coverage:
-        base_path = os.path.join(dirname(dirname(__file__)), "armstrong")
-        files_to_cover = []
-        for (dir, dirs, files) in os.walk(base_path):
-            if not dir.find("tests") is -1:
-                continue
-            valid = lambda a: a[0] != "." and a[-3:] == ".py"
-            files_to_cover += ["%s/%s" % (dir, file) for file in files if valid(file)]
-        cov = coverage.coverage(branch=True, include=files_to_cover)
+    if coverage_api:
+        local('rm -rf ' + directory)
+        package = __import__('site')
+        base_path = dirname(package.__file__) + '/site-packages/' + get_full_name().replace('.', '/')
+        print "Coverage is covering: " + base_path
+        cov = coverage_api.coverage(branch=True, source=(base_path,))
         cov.start()
     yield
 
     if coverage:
         cov.stop()
-        cov.html_report(directory=directory)
+        print 'there'
+        try:
+            cov.html_report(directory=directory)
+        except coverage_api.misc.CoverageException as e:
+            print "Coverage Exception: %s" % e
     else:
         print "Install coverage.py to measure test coverage"
 
@@ -102,7 +101,7 @@ def pep8():
 
 
 @task
-@possibly_pip_install
+@pip_install
 def test():
     """Run tests against `tested_apps`"""
     with html_coverage_report():
@@ -134,7 +133,7 @@ def docs():
 
 
 @task
-@possibly_pip_install
+@pip_install
 def spec(verbosity=4):
     """Run harvest to run all of the Lettuce specs"""
     defaults = {"DATABASES": {
