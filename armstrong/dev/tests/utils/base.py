@@ -12,10 +12,11 @@ class ArmstrongTestCase(DjangoTestCase):
     def setUp(self):
         fudge.clear_expectations()
         fudge.clear_calls()
-
-    # backported from Django 1.4, should probably have some kind of __hasattr__ test
-    def settings(self, **kwargs):
-        return override_settings(**kwargs)
+    
+    if not hasattr(DjangoTestCase, 'settings'):
+        # backported from Django 1.4
+        def settings(self, **kwargs):
+            return override_settings(**kwargs)
     
     def assertRelatedTo(self, model, field_name, related_model, many=False):
         if many is False:
