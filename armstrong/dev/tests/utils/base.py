@@ -6,7 +6,7 @@ from django.db import models
 try:
     from django.test.utils import override_settings
 except ImportError:
-    from armstrong.dev.tests.utils.backports import override_settings
+    from .backports import override_settings
 
 class ArmstrongTestCase(DjangoTestCase):
     def setUp(self):
