@@ -5,6 +5,7 @@
     "install_requires": [
         "south == 0.7.3",
         "fabric == 1.1.1",
+        "pep8 == 0.6.1",
         "coverage",
         "fudge"
     ]
