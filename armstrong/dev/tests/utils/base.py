@@ -1,6 +1,3 @@
-from pkgutil import extend_path
-__path__ = extend_path(__path__, __name__)
-
 from django.test import TestCase as DjangoTestCase
 import fudge
 
