@@ -93,7 +93,7 @@ def command(*cmds):
 @task
 def pep8():
     """Run pep8 on all .py files in ./armstrong"""
-    local('find ./armstrong -name "*.py" | xargs pep8', capture=False)
+    local('find ./armstrong -name "*.py" | xargs pep8 --repeat', capture=False)
 
 
 @task
