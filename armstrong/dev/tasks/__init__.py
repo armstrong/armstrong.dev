@@ -12,6 +12,7 @@ import os
 from os.path import basename, dirname
 import sys
 from functools import wraps
+import unittest
 
 import json
 
@@ -19,7 +20,7 @@ from fabric.api import *
 from fabric.colors import red
 from fabric.decorators import task
 
-from armstrong.dev.virtualdjango.test_runner import run_tests
+from armstrong.dev.virtualdjango.test_runner import run_tests as run_django_tests
 from armstrong.dev.virtualdjango.base import VirtualDjango
 
 if not "fabfile" in sys.modules:
@@ -100,9 +101,22 @@ def pep8():
 @pip_install
 def test():
     """Run tests against `tested_apps`"""
-    with html_coverage_report():
-        run_tests(fabfile.settings, *fabfile.tested_apps)
-
+    if hasattr(fabfile, 'settings' ):
+        with html_coverage_report():
+            run_django_tests(fabfile.settings, *fabfile.tested_apps)
+    elif(hasattr(fabfile, 'test_suite')):
+        test_suite=getattr(fabfile, 'test_suite')
+        with html_coverage_report():
+            unittest.TextTestRunner(verbosity=2).run(test_suite)
+    else:
+        error = '''The fabfile must either contain django settings or 
+                    supply a test_suite. See the armstrong.apps.audio 
+                    fabfile.py for a example of testing a django app. 
+                    See armstrong.apps.audio.backends.id3reader fabfile.py 
+                    for a example of running a simple test suite'''
+        raise ImproperlyConfigured(error)
+       
+    
 
 @task
 def runserver():
