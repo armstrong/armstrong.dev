@@ -22,6 +22,7 @@ from fabric.decorators import task
 
 from armstrong.dev.virtualdjango.test_runner import run_tests as run_django_tests
 from armstrong.dev.virtualdjango.base import VirtualDjango
+from django.core.exceptions import ImproperlyConfigured
 
 if not "fabfile" in sys.modules:
     sys.stderr.write("This expects to have a 'fabfile' module\n")
