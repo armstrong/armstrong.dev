@@ -105,14 +105,26 @@ def test():
     if hasattr(fabfile, 'settings' ):
         with html_coverage_report():
             run_django_tests(fabfile.settings, *fabfile.tested_apps)
-    elif(hasattr(fabfile, 'test_suite')):
-        test_suite=getattr(fabfile, 'test_suite')
-        with html_coverage_report():
-            unittest.TextTestRunner(verbosity=2).run(test_suite)
+        return
     else:
-        raise ImproperlyConfigured(
-            "Unable to find tests to run.  Please see armstrong.dev README."
-        )
+        test_module = "%s.tests" % get_full_name()
+        try:
+            __import__(test_module)
+            tests = sys.modules[test_module]
+        except ImportError:
+            tests = False
+            pass
+
+        if tests:
+            test_suite = getattr(tests, "suite", False)
+            if test_suite:
+                with html_coverage_report():
+                    unittest.TextTestRunner().run(test_suite)
+                return
+
+    raise ImproperlyConfigured(
+        "Unable to find tests to run.  Please see armstrong.dev README."
+    )
 
 
 @task
