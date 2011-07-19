@@ -109,12 +109,9 @@ def test():
         with html_coverage_report():
             unittest.TextTestRunner(verbosity=2).run(test_suite)
     else:
-        error = '''The fabfile must either contain django settings or
-                    supply a test_suite. See the armstrong.apps.audio
-                    fabfile.py for a example of testing a django app.
-                    See armstrong.apps.audio.backends.id3reader fabfile.py
-                    for a example of running a simple test suite'''
-        raise ImproperlyConfigured(error)
+        raise ImproperlyConfigured(
+            "Unable to find tests to run.  Please see armstrong.dev README."
+        )
 
 
 @task
