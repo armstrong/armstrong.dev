@@ -16,6 +16,12 @@ class ArmstrongTestCase(DjangoTestCase):
     if not hasattr(DjangoTestCase, 'settings'):
         # backported from Django 1.4
         def settings(self, **kwargs):
+            """
+            A context manager that temporarily sets a setting and reverts
+            back to the original value when exiting the context.
+
+            .. seealso: https://github.com/django/django/blob/0d670682952fae585ce5c5ec5dc335bd61d66bb2/django/test/testcases.py#L349-354
+            """
             return override_settings(**kwargs)
     
     def assertRelatedTo(self, model, field_name, related_model, many=False):
