@@ -34,7 +34,7 @@ FABRIC_TASK_MODULE = True
 
 
 __all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
-           "runserver", "shell", "spec", "syncdb", ]
+           "reinstall", "runserver", "shell", "spec", "syncdb", ]
 
 def pip_install(func):
     @wraps(func)
