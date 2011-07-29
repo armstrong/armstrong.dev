@@ -187,3 +187,9 @@ def get_full_name():
             sys.stderr.flush()
             sys.exit(1)
     return fabfile.full_name
+
+
+@task
+def reinstall():
+    """Install the current component"""
+    local("pip uninstall -y `basename \\`pwd\\``; pip install .")
