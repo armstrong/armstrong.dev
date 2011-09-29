@@ -55,7 +55,9 @@ def html_coverage_report(directory="./coverage"):
         package = __import__('site')
         base_path = dirname(package.__file__) + '/site-packages/' + get_full_name().replace('.', '/')
         print "Coverage is covering: " + base_path
-        cov = coverage.coverage(branch=True, source=(base_path,))
+        cov = coverage.coverage(branch=True,
+                                source=(base_path,),
+                                omit=('*/migrations/*',))
         cov.start()
     yield
 
