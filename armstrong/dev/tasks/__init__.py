@@ -104,7 +104,8 @@ def pep8():
 @pip_install
 def test():
     """Run tests against `tested_apps`"""
-    if hasattr(fabfile, 'settings' ):
+    from types import FunctionType
+    if hasattr(fabfile, 'settings') and type(fabfile.settings) is not FunctionType:
         with html_coverage_report():
             run_django_tests(fabfile.settings, *fabfile.tested_apps)
         return
