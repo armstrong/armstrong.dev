@@ -41,8 +41,9 @@ def pip_install(func):
     def inner(*args, **kwargs):
         if getattr(fabfile, "pip_install_first", True):
             with settings(warn_only=True):
-                local("pip uninstall -y %s" % get_full_name(), capture=False)
-                local("pip install .", capture=False)
+                if not os.environ.get("SKIP_INSTALL", False):
+                    local("pip uninstall -y %s" % get_full_name(), capture=False)
+                    local("pip install .", capture=False)
         func(*args, **kwargs)
     return inner
 
@@ -50,7 +51,11 @@ def pip_install(func):
 def html_coverage_report(directory="./coverage"):
     # This relies on this being run from within a directory named the same as
     # the repository on GitHub.  It's fragile, but for our purposes, it works.
-    if coverage:
+    run_coverage = coverage
+    if run_coverage and os.environ.get("SKIP_COVERAGE", False):
+        run_coverage = False
+
+    if run_coverage:
         local('rm -rf ' + directory)
         package = __import__('site')
         base_path = dirname(package.__file__) + '/site-packages/' + get_full_name().replace('.', '/')
@@ -61,7 +66,7 @@ def html_coverage_report(directory="./coverage"):
         cov.start()
     yield
 
-    if coverage:
+    if run_coverage:
         cov.stop()
         cov.html_report(directory=directory)
     else:
