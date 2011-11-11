@@ -41,7 +41,7 @@ def pip_install(func):
     def inner(*args, **kwargs):
         if getattr(fabfile, "pip_install_first", True):
             with settings(warn_only=True):
-                if not os.environ.get("SKIP_INSTALL", True):
+                if not os.environ.get("SKIP_INSTALL", False):
                     local("pip uninstall -y %s" % get_full_name(), capture=False)
                     local("pip install .", capture=False)
         func(*args, **kwargs)
