@@ -83,8 +83,8 @@ def clean():
 def create_migration(name, initial=False, auto=True):
     """Create a South migration for app"""
     command((("schemamigration", fabfile.main_app, name), {
-        "initial": bool(initial),
-        "auto": bool(auto),
+        "initial": bool(int(initial)),
+        "auto": bool(int(auto)),
     }))
 
 
