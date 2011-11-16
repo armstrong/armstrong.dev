@@ -80,9 +80,12 @@ def clean():
 
 
 @task
-def create_migration(name):
-    """Create a migration for provided app -- requires South"""
-    command((("schemamigration", fabfile.main_app, name), {"initial": True}))
+def create_migration(name, initial=False, auto=True):
+    """Create a South migration for app"""
+    command((("schemamigration", fabfile.main_app, name), {
+        "initial": bool(int(initial)),
+        "auto": bool(int(auto)),
+    }))
 
 
 @task
