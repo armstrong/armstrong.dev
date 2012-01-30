@@ -178,6 +178,7 @@ def spec(verbosity=4):
     v = VirtualDjango()
     v.run(defaults)
     v.call_command("syncdb", interactive=False)
+    v.call_command("migrate")
     v.call_command("harvest", apps=fabfile.full_name,
             verbosity=verbosity)
 
