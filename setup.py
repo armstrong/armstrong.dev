@@ -5,11 +5,12 @@ Nothing in this file should need to be edited, please see accompanying
 package.json file if you need to adjust metadata about this package.
 """
 
-from distutils.core import setup
 import json
-import os
+from setuptools import setup, find_packages
+
 
 info = json.load(open("./package.json"))
+NAMESPACE_PACKAGES = []
 
 
 def convert_to_str(d):
@@ -31,7 +32,6 @@ def convert_to_str(d):
     return d2
 
 info = convert_to_str(info)
-NAMESPACE_PACKAGES = []
 
 
 # TODO: simplify this process
@@ -43,48 +43,14 @@ def generate_namespaces(package):
 generate_namespaces(info["name"])
 
 
-if os.path.exists("MANIFEST"):
-    os.unlink("MANIFEST")
-
-# Borrowed and modified from django-registration
-# Compile the list of packages available, because distutils doesn't have
-# an easy way to do this.
-packages, data_files = [], []
-root_dir = os.path.dirname(__file__)
-if root_dir:
-    os.chdir(root_dir)
-
-
-def build_package(dirpath, dirnames, filenames):
-    # Ignore dirnames that start with '.'
-    for i, dirname in enumerate(dirnames):
-        if dirname.startswith('.'):
-            del dirnames[i]
-    if '__init__.py' in filenames and 'steps.py' not in filenames:
-        pkg = dirpath.replace(os.path.sep, '.')
-        if os.path.altsep:
-            pkg = pkg.replace(os.path.altsep, '.')
-        packages.append(pkg)
-    elif filenames:
-        # Strip off the length of the package name plus the trailing slash
-        prefix = dirpath[len(info["name"]) + 1:]
-        for f in filenames:
-            # Ignore all dot files and any compiled
-            if f.startswith(".") or f.endswith(".pyc"):
-                continue
-            data_files.append(os.path.join(prefix, f))
-
-
-[build_package(dirpath, dirnames, filenames) for dirpath, dirnames, filenames
-        in os.walk(info["name"].replace(".", "/"))]
-
 setup_kwargs = {
     "author": "Bay Citizen & Texas Tribune",
     "author_email": "dev@armstrongcms.org",
     "url": "http://github.com/armstrong/%s/" % info["name"],
-    "packages": packages,
-    "package_data": {info["name"]: data_files, },
+    "packages": find_packages(exclude=["*.tests", "*.tests.*"]),
     "namespace_packages": NAMESPACE_PACKAGES,
+    "include_package_data": True,
+    "zip_safe": False,
     "classifiers": [
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',

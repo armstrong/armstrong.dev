@@ -1,6 +1,5 @@
-
-from pkgutil import extend_path
-__path__ = extend_path(__path__, __name__)
+import pkg_resources
+pkg_resources.declare_namespace(__name__)
 
 
 from contextlib import contextmanager
@@ -9,7 +8,7 @@ try:
 except ImportError:
     coverage = False
 import os
-from os.path import basename, dirname
+from os.path import dirname
 import sys
 from functools import wraps
 import unittest
@@ -36,6 +35,7 @@ FABRIC_TASK_MODULE = True
 __all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
            "reinstall", "runserver", "shell", "spec", "syncdb", ]
 
+
 def pip_install(func):
     @wraps(func)
     def inner(*args, **kwargs):
@@ -46,6 +46,7 @@ def pip_install(func):
                     local("pip install .", capture=False)
         func(*args, **kwargs)
     return inner
+
 
 @contextmanager
 def html_coverage_report(directory="./coverage"):
@@ -181,6 +182,7 @@ def spec(verbosity=4):
     v.call_command("migrate")
     v.call_command("harvest", apps=fabfile.full_name,
             verbosity=verbosity)
+
 
 def get_full_name():
     if not hasattr(fabfile, "full_name"):
