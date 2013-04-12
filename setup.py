@@ -13,27 +13,6 @@ info = json.load(open("./package.json"))
 NAMESPACE_PACKAGES = []
 
 
-def convert_to_str(d):
-    """
-    Recursively convert all values in a dictionary to strings
-
-    This is required because setup() does not like unicode in
-    the values it is supplied.
-    """
-    d2 = {}
-    for k, v in d.items():
-        k = str(k)
-        if type(v) in [list, tuple]:
-            d2[k] = [str(a) for a in v]
-        elif type(v) is dict:
-            d2[k] = convert_to_str(v)
-        else:
-            d2[k] = str(v)
-    return d2
-
-info = convert_to_str(info)
-
-
 # TODO: simplify this process
 def generate_namespaces(package):
     new_package = ".".join(package.split(".")[0:-1])
