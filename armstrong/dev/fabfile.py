@@ -13,6 +13,11 @@ from armstrong.dev.dev_django import run_django_cmd
 
 FABRIC_TASK_MODULE = True
 
+__all__ = ["clean", "create_migration", "docs", "pep8", "test",
+           "install", "spec", "proxy"]
+
+
+
 # Grab our package information
 import json
 package = json.load(open("./package.json"))
@@ -36,9 +41,22 @@ def require_self(func=None):
     return decorator if not func else decorator(func)
 
 
+def require_pip_module(module):
+    """Decorator to check for a module and helpfully exit if it's not found"""
 
-__all__ = ["clean", "create_migration", "docs", "pep8", "test",
-           "install", "spec", "proxy"]
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                __import__(module)
+            except ImportError:
+                sys.stderr.write(
+                    yellow("`pip install %s` to enable this feature\n" % module))
+                sys.exit(1)
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 
@@ -77,6 +95,7 @@ def clean():
 
 @task
 @require_self
+@require_pip_module('south')
 def create_migration(name, initial=False, auto=True):
     """Create a South migration for app"""
     command((("schemamigration", fabfile.main_app, name), {
@@ -88,6 +107,7 @@ def create_migration(name, initial=False, auto=True):
 
 
 @task
+@require_pip_module('pep8')
 def pep8():
     """Run pep8 on all .py files in ./armstrong"""
     local('find ./armstrong -name "*.py" | xargs pep8 --repeat', capture=False)
@@ -138,6 +158,7 @@ def proxy(cmd=None, *args, **kwargs):
 
 
 @task
+@require_pip_module('sphinx')
 def docs():
     """Generate the Sphinx docs for this project"""
     local("cd docs && make html")

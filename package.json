@@ -3,10 +3,7 @@
     "version": "1.14.0alpha.0",
     "description": "Tools needed for development and testing of Armstrong",
     "install_requires": [
-        "South==0.7.3",
-        "Fabric==1.3.3",
-        "pep8 == 0.6.1",
-        "coverage == 3.5.1",
-        "fudge == 1.0.3"
+        "Fabric<2.0",
+        "fudge==1.0.3"
     ]
 }
