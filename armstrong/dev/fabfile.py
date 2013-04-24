@@ -1,5 +1,6 @@
 import sys
 from os.path import dirname
+from ast import literal_eval
 from functools import wraps
 from contextlib import contextmanager
 
@@ -14,7 +15,7 @@ FABRIC_TASK_MODULE = True
 
 
 __all__ = ["clean", "create_migration", "docs", "pep8", "test",
-           "reinstall", "spec", "proxy"]
+           "install", "spec", "proxy"]
 
 def pip_install(func):
     @wraps(func)
@@ -165,9 +166,22 @@ def get_full_name():
             sys.stderr.flush()
             sys.exit(1)
     return fabfile.full_name
+def install(editable=True):
+    """Install this component (or remove and reinstall)"""
+
+    try:
+        __import__(package['name'])
+    except ImportError:
+        pass
+    else:
+        with settings(warn_only=True):
+            local("pip uninstall --quiet -y %s" % package['name'], capture=False)
+
+    cmd = "pip install --quiet "
+    cmd += "-e ." if literal_eval(editable) else "."
+
+    with settings(warn_only=True):
+        local(cmd, capture=False)
 
 
 @task
-def reinstall():
-    """Install the current component"""
-    local("pip uninstall -y `basename \\`pwd\\``; pip install .")
