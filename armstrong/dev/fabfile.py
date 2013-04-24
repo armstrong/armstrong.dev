@@ -1,40 +1,20 @@
-
-from pkgutil import extend_path
-__path__ = extend_path(__path__, __name__)
-
-
-from contextlib import contextmanager
-try:
-    import coverage as coverage
-except ImportError:
-    coverage = False
-import os
-from os.path import basename, dirname
 import sys
+from os.path import dirname
 from functools import wraps
-import unittest
+from contextlib import contextmanager
 
-import json
-
-from fabric.api import *
-from fabric.colors import red
+from fabric.api import local, settings
+from fabric.colors import yellow, red
 from fabric.decorators import task
 
-from armstrong.dev.virtualdjango.test_runner import run_tests as run_django_tests
-from armstrong.dev.virtualdjango.base import VirtualDjango
-from django.core.exceptions import ImproperlyConfigured
-
-if not "fabfile" in sys.modules:
-    sys.stderr.write("This expects to have a 'fabfile' module\n")
-    sys.stderr.write(-1)
-fabfile = sys.modules["fabfile"]
+from armstrong.dev.dev_django import run_django_cmd
 
 
 FABRIC_TASK_MODULE = True
 
 
-__all__ = ["clean", "command", "create_migration", "docs", "pep8", "test",
-           "reinstall", "runserver", "shell", "spec", "syncdb", ]
+__all__ = ["clean", "create_migration", "docs", "pep8", "test",
+           "reinstall", "spec", "proxy"]
 
 def pip_install(func):
     @wraps(func)
@@ -46,6 +26,8 @@ def pip_install(func):
                     local("pip install .", capture=False)
         func(*args, **kwargs)
     return inner
+
+
 
 @contextmanager
 def html_coverage_report(directory="./coverage"):
@@ -88,18 +70,6 @@ def create_migration(name, initial=False, auto=True):
     }))
 
 
-@task
-def command(*cmds):
-    """Run and arbitrary set of Django commands"""
-    runner = VirtualDjango()
-    runner.run(fabfile.settings)
-    for cmd in cmds:
-        if type(cmd) is tuple:
-            args, kwargs = cmd
-        else:
-            args = (cmd, )
-            kwargs = {}
-        runner.call_command(*args, **kwargs)
 
 
 @task
@@ -139,21 +109,17 @@ def test():
 
 
 @task
-def runserver():
-    """Create a Django development server"""
-    command("runserver")
 
 
 @task
-def shell():
-    """Launch shell with same settings as test and runserver"""
-    command("shell")
+def proxy(cmd=None, *args, **kwargs):
+    """Run manage.py using this component's specific Django settings"""
 
-
-@task
-def syncdb():
-    """Call syncdb and migrate on project"""
-    command("syncdb", "migrate")
+    if cmd is None:
+        sys.stderr.write(red("Usage: fab proxy:<command>,arg1,kwarg=1\n") +
+            "which translates to: manage.py command arg1 --kwarg=1\n")
+        sys.exit(1)
+    run_django_cmd(cmd, *args, **kwargs)
 
 
 @task
