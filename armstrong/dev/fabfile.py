@@ -13,9 +13,8 @@ from armstrong.dev.dev_django import run_django_cmd
 
 FABRIC_TASK_MODULE = True
 
-__all__ = ["clean", "create_migration", "docs", "pep8", "test",
-           "install", "proxy"]
-
+__all__ = ["clean", "create_migration", "docs", "pep8", "proxy",
+    "coverage", "test", "install"]
 
 
 # Grab our package information
@@ -59,32 +58,25 @@ def require_pip_module(module):
     return decorator
 
 
-
-
 @contextmanager
-def html_coverage_report(directory="./coverage"):
-    # This relies on this being run from within a directory named the same as
-    # the repository on GitHub.  It's fragile, but for our purposes, it works.
-    run_coverage = coverage
-    if run_coverage and os.environ.get("SKIP_COVERAGE", False):
-        run_coverage = False
+def html_coverage_report(report_directory=None):
+    package_parent = str(package['name'].rsplit('.', 1)[0])  # fromlist can't handle unicode
+    module = __import__(package['name'], fromlist=[package_parent])
+    base_path = dirname(module.__file__)
 
-    if run_coverage:
-        local('rm -rf ' + directory)
-        package = __import__('site')
-        base_path = dirname(package.__file__) + '/site-packages/' + get_full_name().replace('.', '/')
-        print "Coverage is covering: " + base_path
-        cov = coverage.coverage(branch=True,
-                                source=(base_path,),
-                                omit=('*/migrations/*',))
-        cov.start()
+    import coverage as coverage_api
+    print("Coverage is covering: %s" % base_path)
+    cov = coverage_api.coverage(branch=True, source=[base_path])
+
+    cov.start()
     yield
+    cov.stop()
 
-    if run_coverage:
-        cov.stop()
-        cov.html_report(directory=directory)
-    else:
-        print "Install coverage.py to measure test coverage"
+    # Write results
+    report_directory = report_directory or "coverage"
+    local('rm -rf ' + report_directory)
+    cov.html_report(directory=report_directory)
+    print("Coverage reports available in: %s " % report_directory)
 
 
 @task
@@ -117,35 +109,25 @@ def pep8():
 
 @task
 @require_self
-def test():
-    """Run tests against `tested_apps`"""
-    from types import FunctionType
-    if hasattr(fabfile, 'settings') and type(fabfile.settings) is not FunctionType:
-        with html_coverage_report():
-            run_django_tests(fabfile.settings, *fabfile.tested_apps)
-        return
-    else:
-        test_module = "%s.tests" % get_full_name()
-        try:
-            __import__(test_module)
-            tests = sys.modules[test_module]
-        except ImportError:
-            tests = False
-            pass
-
-        if tests:
-            test_suite = getattr(tests, "suite", False)
-            if test_suite:
-                with html_coverage_report():
-                    unittest.TextTestRunner().run(test_suite)
-                return
-
-    raise ImproperlyConfigured(
-        "Unable to find tests to run.  Please see armstrong.dev README."
-    )
+def test(*args, **kwargs):
+    """Test this component via `manage.py test`"""
+    run_django_cmd('test', *args, **kwargs)
 
 
 @task
+@require_self
+@require_pip_module('coverage')
+def coverage(*args, **kwargs):
+    """Test this project with coverage reports"""
+
+    # Option to pass in the coverage report directory
+    coverage_dir = kwargs.pop('coverage_dir', None)
+
+    try:
+        with html_coverage_report(coverage_dir):
+            run_django_cmd('test', *args, **kwargs)
+    except (ImportError, EnvironmentError):
+        sys.exit(1)
 
 
 @task
