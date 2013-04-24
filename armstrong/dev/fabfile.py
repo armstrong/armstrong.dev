@@ -14,7 +14,7 @@ from armstrong.dev.dev_django import run_django_cmd
 FABRIC_TASK_MODULE = True
 
 __all__ = ["clean", "create_migration", "docs", "pep8", "test",
-           "install", "spec", "proxy"]
+           "install", "proxy"]
 
 
 
@@ -96,14 +96,16 @@ def clean():
 @task
 @require_self
 @require_pip_module('south')
-def create_migration(name, initial=False, auto=True):
-    """Create a South migration for app"""
-    command((("schemamigration", fabfile.main_app, name), {
-        "initial": bool(int(initial)),
-        "auto": bool(int(auto)),
-    }))
+def create_migration(initial=False):
+    """Create a South migration for this project"""
 
+    from django.conf import settings as django_settings
+    if 'south' not in (name.lower() for name in django_settings.INSTALLED_APPS):
+        print("Temporarily adding 'south' into INSTALLED_APPS.")
+        django_settings.INSTALLED_APPS.append('south')
 
+    kwargs = dict(initial=True) if literal_eval(initial) else dict(auto=True)
+    run_django_cmd('schemamigration', package['name'], **kwargs)
 
 
 @task
@@ -165,42 +167,6 @@ def docs():
 
 
 @task
-@require_self
-def spec(verbosity=4):
-    """Run harvest to run all of the Lettuce specs"""
-    defaults = {"DATABASES": {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
-        },
-    }}
-
-    get_full_name()
-    defaults.update(fabfile.settings)
-    v = VirtualDjango()
-    v.run(defaults)
-    v.call_command("syncdb", interactive=False)
-    v.call_command("migrate")
-    v.call_command("harvest", apps=fabfile.full_name,
-            verbosity=verbosity)
-
-def get_full_name():
-    if not hasattr(fabfile, "full_name"):
-        try:
-            package_string = local("cat ./package.json", capture=True)
-            package_obj = json.loads(package_string)
-            fabfile.full_name = package_obj['name']
-            return fabfile.full_name
-        except:
-            sys.stderr.write("\n".join([
-                red("No `full_name` variable detected in your fabfile!"),
-                red("Please set `full_name` to the app's full module"),
-                red("Additionally, we couldn't read name from package.json"),
-                ""
-            ]))
-            sys.stderr.flush()
-            sys.exit(1)
-    return fabfile.full_name
 def install(editable=True):
     """Install this component (or remove and reinstall)"""
 
