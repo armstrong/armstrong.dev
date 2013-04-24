@@ -4,16 +4,18 @@ from django.conf.global_settings import *
 # Grab our package information
 import json
 package = json.load(open("./package.json"))
+app_name = package['name'].rsplit('.', 1)[1]
 
 
 #
 # Default settings
 #
-TESTED_APPS = ['tests']
-INSTALLED_APPS = [package["name"], 'tests']
+TESTED_APPS = [app_name]
+INSTALLED_APPS = [package['name']]
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3"
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": 'database'
     }
 }
 

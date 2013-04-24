@@ -18,7 +18,7 @@ sys.path.append(os.getcwd())
 try:
     import env_settings as package_settings
 except ImportError as e:
-    print ("Could not find component specific settings file."
+    print("Could not find component specific settings file. "
         "Using armstrong.dev defaults...")
     try:
         import armstrong.dev.default_settings as package_settings
@@ -43,7 +43,7 @@ def determine_test_args(test_labels):
     return test_labels or getattr(settings, 'TESTED_APPS', [])
 
 
-# Import usage
+# Import access
 def run_django_cmd(cmd, *args, **kwargs):
     if cmd == "test":
         args = determine_test_args(args)
@@ -53,7 +53,7 @@ def run_django_cmd(cmd, *args, **kwargs):
 
 
 # Commandline access
-if __name__ == "__main__":
+def run_django_cli():
     args = sys.argv[2:]
 
     if len(sys.argv) > 1 and sys.argv[1] == "test":
@@ -65,3 +65,7 @@ if __name__ == "__main__":
 
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv[:2] + args)
+
+
+if __name__ == "__main__":
+    run_django_cli()
