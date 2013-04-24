@@ -14,7 +14,7 @@ from armstrong.dev.dev_django import run_django_cmd
 FABRIC_TASK_MODULE = True
 
 __all__ = ["clean", "create_migration", "docs", "pep8", "proxy",
-    "coverage", "test", "install"]
+    "coverage", "test", "install", "remove_armstrong"]
 
 
 # Grab our package information
@@ -168,3 +168,19 @@ def install(editable=True):
 
 
 @task
+def remove_armstrong():
+    """Remove all armstrong components (except for dev) from this environment"""
+
+    from pip.util import get_installed_distributions
+    pkgs = get_installed_distributions(local_only=True, include_editables=True)
+    apps = [pkg for pkg in pkgs
+        if pkg.key.startswith('armstrong') and pkg.key != 'armstrong.dev']
+
+    for app in apps:
+        local("pip uninstall -y %s" % app.key)
+
+    if apps:
+        print("Note: this hasn't removed other dependencies installed by "
+            "these components. There's no substitute for a fresh virtualenv.")
+    else:
+        print("No armstrong components to remove.")
