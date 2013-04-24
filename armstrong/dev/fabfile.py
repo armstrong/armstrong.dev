@@ -13,20 +13,33 @@ from armstrong.dev.dev_django import run_django_cmd
 
 FABRIC_TASK_MODULE = True
 
+# Grab our package information
+import json
+package = json.load(open("./package.json"))
+
+
+def require_self(func=None):
+    """Decorator to require that this component be installed"""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                __import__(package['name'])
+            except ImportError:
+                sys.stderr.write(
+                    red("This component needs to be installed first. Run ") +
+                    yellow("`fab install`\n"))
+                sys.exit(1)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator if not func else decorator(func)
+
+
 
 __all__ = ["clean", "create_migration", "docs", "pep8", "test",
            "install", "spec", "proxy"]
 
-def pip_install(func):
-    @wraps(func)
-    def inner(*args, **kwargs):
-        if getattr(fabfile, "pip_install_first", True):
-            with settings(warn_only=True):
-                if not os.environ.get("SKIP_INSTALL", False):
-                    local("pip uninstall -y %s" % get_full_name(), capture=False)
-                    local("pip install .", capture=False)
-        func(*args, **kwargs)
-    return inner
 
 
 
@@ -63,6 +76,7 @@ def clean():
 
 
 @task
+@require_self
 def create_migration(name, initial=False, auto=True):
     """Create a South migration for app"""
     command((("schemamigration", fabfile.main_app, name), {
@@ -80,7 +94,7 @@ def pep8():
 
 
 @task
-@pip_install
+@require_self
 def test():
     """Run tests against `tested_apps`"""
     from types import FunctionType
@@ -130,7 +144,7 @@ def docs():
 
 
 @task
-@pip_install
+@require_self
 def spec(verbosity=4):
     """Run harvest to run all of the Lettuce specs"""
     defaults = {"DATABASES": {
