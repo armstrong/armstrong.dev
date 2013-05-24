@@ -96,7 +96,7 @@ def create_migration(initial=False):
         print("Temporarily adding 'south' into INSTALLED_APPS.")
         django_settings.INSTALLED_APPS.append('south')
 
-    kwargs = dict(initial=True) if literal_eval(initial) else dict(auto=True)
+    kwargs = dict(initial=True) if literal_eval(str(initial)) else dict(auto=True)
     run_django_cmd('schemamigration', package['name'], **kwargs)
 
 
@@ -161,7 +161,7 @@ def install(editable=True):
             local("pip uninstall --quiet -y %s" % package['name'], capture=False)
 
     cmd = "pip install --quiet "
-    cmd += "-e ." if literal_eval(editable) else "."
+    cmd += "-e ." if literal_eval(str(editable)) else "."
 
     with settings(warn_only=True):
         local(cmd, capture=False)
