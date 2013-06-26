@@ -46,9 +46,6 @@ class ArmstrongTestCase(DjangoTestCase):
                     field_class.__class__.__name__)
             self.assertTrue(isinstance(field, field_class), msg=msg)
 
-    def assertNone(self, obj, **kwargs):
-        self.assertTrue(obj is None, **kwargs)
-
     def assertIsA(self, obj, cls, **kwargs):
         self.assertTrue(isinstance(obj, cls), **kwargs)
 
