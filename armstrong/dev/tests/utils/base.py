@@ -45,6 +45,3 @@ class ArmstrongTestCase(DjangoTestCase):
             msg = "%s.%s is not a %s" % (model.__class__.__name__, field_name,
                     field_class.__class__.__name__)
             self.assertTrue(isinstance(field, field_class), msg=msg)
-
-    def assertDoesNotHave(self, obj, attr, **kwargs):
-        self.assertFalse(hasattr(obj, attr), **kwargs)
