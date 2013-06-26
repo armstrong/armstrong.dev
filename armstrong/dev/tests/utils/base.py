@@ -1,5 +1,4 @@
 from django.test import TestCase as DjangoTestCase
-import fudge
 from django.db import models
 
 # DEPRECATED remove when we drop Django 1.3 support
@@ -9,11 +8,19 @@ try:
 except ImportError:
     from .backports import override_settings
 
+# If the component uses fudge, provide useful shared behavior
+try:
+    import fudge
+    hasFudge = True
+except ImportError:
+    hasFudge = False
+
 
 class ArmstrongTestCase(DjangoTestCase):
-    def setUp(self):
-        fudge.clear_expectations()
-        fudge.clear_calls()
+    if hasFudge:
+        def setUp(self):
+            fudge.clear_expectations()
+            fudge.clear_calls()
 
     # DEPRECATED remove when we drop Django 1.3 support
     if not hasattr(DjangoTestCase, 'settings'):
