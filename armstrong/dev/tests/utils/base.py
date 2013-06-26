@@ -8,7 +8,6 @@ try:
 except ImportError:
     from .backports import override_settings
 
-
 class ArmstrongTestCase(DjangoTestCase):
     def setUp(self):
         fudge.clear_expectations()
@@ -46,13 +45,6 @@ class ArmstrongTestCase(DjangoTestCase):
             msg = "%s.%s is not a %s" % (model.__class__.__name__, field_name,
                     field_class.__class__.__name__)
             self.assertTrue(isinstance(field, field_class), msg=msg)
-
-    def assertInContext(self, var_name, other, template_or_context):
-        # TODO: support passing in a straight "context" (i.e., dict)
-        context = template_or_context.context_data
-        self.assertTrue(var_name in context,
-                msg="`%s` not in provided context" % var_name)
-        self.assertEqual(context[var_name], other)
 
     def assertNone(self, obj, **kwargs):
         self.assertTrue(obj is None, **kwargs)
