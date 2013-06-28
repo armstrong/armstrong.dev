@@ -6,47 +6,78 @@ This package contains some of the various helpers needed to do development work
 on the Armstrong packages.  If you're not actively developing, or working with
 development versions of Armstrong, you probably don't need this package.
 
-Usage
------
-
-Create a `fabfile` (either `fabfile/__init__.py` or simply `fabfile.py`) in
-your project and add the following::
-
-    from armstrong.dev.tasks import *
-
-
-    settings = {
-        "DEBUG": True,
-        # And so on with the keys being the name of the setting and the values
-        # the appropriate value.
-    }
-
-    main_app = "name.of.your.app"
-    tested_apps ("another_app", main_app, )
-
-
-Now your fabfile will expose the various commands for setting up and running
-your reusable app inside a virtualenv for testing, interacting with via the
-shell, and even running a simple server.
-
-Type ``fab -l`` to see a list of all of the commands.
-
-
 Installation
 ------------
+1. ``pip install armstrong.dev``
 
-::
 
-    name="armstrong.dev"
-    pip install -e git://github.com/armstrong/$name#egg=$name
+Usage
+-----
+Most Armstrong components already have the necessary configuration to use these
+Dev tools. Type ``fab -l`` to see a list of all of the commands.
 
-**Note**: This currently relies on a development version of Fabric.  This
-requirement is set to be dropped once Fabric 1.1 is released.  To ensure this
-runs as expected, install the ``tswicegood/fabric`` fork of Fabric:
+If you are creating a new component (or perhaps updating one that uses
+the older, pre 2.0 Dev tools), you'll need these next two steps.
 
-::
+1. Create a ``fabfile.py`` and add the following::
 
-    pip install -e git://github.com/tswicegood/fabric.git#egg=fabric
+    from armstrong.dev.fabfile import *
+
+    # any additional Fabric commands
+    # ...
+
+2. Create an ``env_settings.py`` and add the following::
+
+    from armstrong.dev.default_settings import *
+
+    # any additional settings
+    # ...
+
+
+Notable changes in 2.0
+----------------------
+This version offers an easier and more standard way to run a Django
+environment with a component's specific settings, either from the
+commandline or via import.
+
+It provides an "a la carte" requirements approach. Meaning that if you run a
+Fabric command that needs a package that isn't installed, it will prompt you
+to install it instead of requiring everything up-front. This allows for much
+faster virtualenv creation (which saves considerable time in testing) and
+doesn't pollute your virtualenv with packages for features you don't use.
+
+``test`` and ``coverage`` will work better with automated test tools like
+TravisCI and Tox. These commands also now work like Django's native test
+command so that you can pass arguments for running selective tests, i.e::
+
+	fab test [<app name>[.<test case>[.<test name>]]]
+
+Settings are now defined in the normal Django style in an ``env_settings.py``
+file instead of as a dict within the Fabric config. It's not called
+"settings.py" to make it clearer that these are settings for the development
+and testing of this component, not necessarily values to copy/paste for
+incorporating the component into other projects.
+
+
+Backward incompatible changes in 2.0
+------------------------------------
+* ``env_settings.py`` is necessary and contains the settings that
+  ``fabfile.py`` used to have.
+
+* ``fabfile.py`` imports from a different place and no longer defines the
+  settings configurations.
+
+Not required but as long as you are reviewing the general state of things,
+take care of these things too!
+
+* Review the ``requirements`` files.
+* Add a ``tox.ini`` file.
+* Review or add a TravisCI configuration.
+* Review ``.gitignore``. You might want to ignore these::
+
+	.tox/
+	coverage*/
+	*.egg-info
 
 
 Contributing
@@ -57,24 +88,27 @@ Contributing
 * `Fork it`_
 * Create a topic branch to house your changes
 * Get all of your commits in the new topic branch
-* Submit a `pull request`_
+* Submit a `Pull Request`_
+
+.. _Pull Request: https://help.github.com/articles/using-pull-requests
+.. _Fork it: https://help.github.com/articles/fork-a-repo
 
 
-License
--------
-Copyright 2011 Bay Citizen and Texas Tribune
+State of Project
+----------------
+Armstrong is an open-source news platform that is freely available to any
+organization.  It is the result of a collaboration between the `Texas Tribune`_
+and `The Center for Investigative Reporting`_ and a grant from the
+`John S. and James L. Knight Foundation`_.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+To follow development, be sure to join the `Google Group`_.
 
-   http://www.apache.org/licenses/LICENSE-2.0
+``armstrong.dev`` is part of the `Armstrong`_ project. You're
+probably looking for that.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 
-.. _pull request: http://help.github.com/pull-requests/
-.. _Fork it: http://help.github.com/forking/
+.. _Armstrong: http://www.armstrongcms.org/
+.. _The Center for Investigative Reporting: http://cironline.org/
+.. _John S. and James L. Knight Foundation: http://www.knightfoundation.org/
+.. _Texas Tribune: http://www.texastribune.org/
+.. _Google Group: http://groups.google.com/group/armstrongcms
