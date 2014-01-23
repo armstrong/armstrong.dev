@@ -13,7 +13,7 @@ from armstrong.dev.dev_django import run_django_cmd
 
 FABRIC_TASK_MODULE = True
 
-__all__ = ["clean", "create_migration", "docs", "pep8", "proxy",
+__all__ = ["clean", "create_migration", "pep8", "proxy",
     "coverage", "test", "install", "remove_armstrong"]
 
 
@@ -139,13 +139,6 @@ def proxy(cmd=None, *args, **kwargs):
             "which translates to: manage.py command arg1 --kwarg=1\n")
         sys.exit(1)
     run_django_cmd(cmd, *args, **kwargs)
-
-
-@task
-@require_pip_module('sphinx')
-def docs():
-    """Generate the Sphinx docs for this project"""
-    local("cd docs && make html")
 
 
 @task
