@@ -16,6 +16,7 @@ except ImportError:
 class ArmstrongTestCase(DjangoTestCase):
     if fudge:
         def setUp(self):
+            super(ArmstrongTestCase, self).setUp()
             fudge.clear_expectations()
             fudge.clear_calls()
 
