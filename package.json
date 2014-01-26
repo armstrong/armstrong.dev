@@ -1,6 +1,6 @@
 {
     "name": "armstrong.dev",
-    "version": "1.14.0alpha.0",
+    "version": "2.0.0alpha.0",
     "description": "Tools needed for development and testing of Armstrong",
     "install_requires": [
         "South==0.7.3",
