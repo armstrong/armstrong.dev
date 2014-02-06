@@ -8,8 +8,8 @@ from fabric.api import local, settings
 from fabric.colors import yellow, red
 from fabric.decorators import task
 
-from armstrong.dev.dev_django import run_django_cmd
 
+from armstrong.dev.dev_django import run_django_cmd, DjangoSettings
 
 FABRIC_TASK_MODULE = True
 
@@ -91,10 +91,10 @@ def clean():
 def create_migration(initial=False):
     """Create a South migration for this project"""
 
-    from django.conf import settings as django_settings
-    if 'south' not in (name.lower() for name in django_settings.INSTALLED_APPS):
+    settings = DjangoSettings()
+    if 'south' not in (name.lower() for name in settings.INSTALLED_APPS):
         print("Temporarily adding 'south' into INSTALLED_APPS.")
-        django_settings.INSTALLED_APPS.append('south')
+        settings.INSTALLED_APPS.append('south')
 
     kwargs = dict(initial=True) if literal_eval(str(initial)) else dict(auto=True)
     run_django_cmd('schemamigration', package['name'], **kwargs)
