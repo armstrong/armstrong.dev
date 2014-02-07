@@ -13,7 +13,8 @@ from armstrong.dev.dev_django import run_django_cmd, DjangoSettings
 
 FABRIC_TASK_MODULE = True
 
-__all__ = ["clean", "create_migration", "pep8", "proxy",
+__all__ = [
+    "clean", "create_migration", "pep8", "managepy",
     "coverage", "test", "install", "remove_armstrong"]
 
 
@@ -131,11 +132,12 @@ def coverage(*args, **kwargs):
 
 
 @task
-def proxy(cmd=None, *args, **kwargs):
+def managepy(cmd=None, *args, **kwargs):
     """Run manage.py using this component's specific Django settings"""
 
     if cmd is None:
-        sys.stderr.write(red("Usage: fab proxy:<command>,arg1,kwarg=1\n") +
+        sys.stderr.write(
+            red("Usage: fab managepy:<command>,arg1,kwarg=1\n") +
             "which translates to: manage.py command arg1 --kwarg=1\n")
         sys.exit(1)
     run_django_cmd(cmd, *args, **kwargs)
@@ -162,7 +164,7 @@ def install(editable=True):
 
 @task
 def remove_armstrong():
-    """Remove all armstrong components (except for dev) from this environment"""
+    """Remove all Armstrong components (except for dev) from this environment"""
 
     from pip.util import get_installed_distributions
     pkgs = get_installed_distributions(local_only=True, include_editables=True)
@@ -176,4 +178,4 @@ def remove_armstrong():
         print("Note: this hasn't removed other dependencies installed by "
             "these components. There's no substitute for a fresh virtualenv.")
     else:
-        print("No armstrong components to remove.")
+        print("No Armstrong components to remove.")
