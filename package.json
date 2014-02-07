@@ -3,6 +3,7 @@
     "version": "2.0.0alpha.0",
     "description": "Tools needed for development and testing of Armstrong",
     "install_requires": [
-        "invoke<1.0"
+        "invoke<1.0",
+        "decorator<4.0"
     ]
 }

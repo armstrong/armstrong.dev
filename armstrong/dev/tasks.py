@@ -1,9 +1,12 @@
 import sys
 from os.path import dirname
-from functools import wraps
 from contextlib import contextmanager
 
 from invoke import task, run
+
+# Decorator keeps the function signature and argspec intact, which we
+# need so @task can build out CLI arguments properly
+from decorator import decorator
 
 from armstrong.dev.dev_django import run_django_cmd, DjangoSettings
 
@@ -18,40 +21,33 @@ import json
 package = json.load(open("./package.json"))
 
 
-def require_self(func=None):
+@decorator
+def require_self(func, *args, **kwargs):
     """Decorator to require that this component be installed"""
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                __import__(package['name'])
-            except ImportError:
-                sys.stderr.write(
-                    "This component needs to be installed first. Run " +
-                    "`invoke install`\n")
-                sys.exit(1)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator if not func else decorator(func)
+    try:
+        __import__(package['name'])
+    except ImportError:
+        sys.stderr.write(
+            "This component needs to be installed first. Run " +
+            "`invoke install`\n")
+        sys.exit(1)
+    return func(*args, **kwargs)
 
 
 def require_pip_module(module):
     """Decorator to check for a module and helpfully exit if it's not found"""
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                __import__(module)
-            except ImportError:
-                sys.stderr.write(
-                    "`pip install %s` to enable this feature\n" % module)
-                sys.exit(1)
-            else:
-                return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    def wrapper(func, *args, **kwargs):
+        try:
+            __import__(module)
+        except ImportError:
+            sys.stderr.write(
+                "`pip install %s` to enable this feature\n" % module)
+            sys.exit(1)
+        else:
+            return func(*args, **kwargs)
+    return decorator(wrapper)
 
 
 @contextmanager
