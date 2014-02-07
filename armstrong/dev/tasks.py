@@ -1,17 +1,12 @@
 import sys
 from os.path import dirname
-from ast import literal_eval
 from functools import wraps
 from contextlib import contextmanager
 
-from fabric.api import local, settings
-from fabric.colors import yellow, red
-from fabric.decorators import task
-
+from invoke import task, run
 
 from armstrong.dev.dev_django import run_django_cmd, DjangoSettings
 
-FABRIC_TASK_MODULE = True
 
 __all__ = [
     "clean", "create_migration", "pep8", "managepy",
@@ -33,8 +28,8 @@ def require_self(func=None):
                 __import__(package['name'])
             except ImportError:
                 sys.stderr.write(
-                    red("This component needs to be installed first. Run ") +
-                    yellow("`fab install`\n"))
+                    "This component needs to be installed first. Run " +
+                    "`invoke install`\n")
                 sys.exit(1)
             return func(*args, **kwargs)
         return wrapper
@@ -51,7 +46,7 @@ def require_pip_module(module):
                 __import__(module)
             except ImportError:
                 sys.stderr.write(
-                    yellow("`pip install %s` to enable this feature\n" % module))
+                    "`pip install %s` to enable this feature\n" % module)
                 sys.exit(1)
             else:
                 return func(*args, **kwargs)
@@ -75,7 +70,7 @@ def html_coverage_report(report_directory=None):
 
     # Write results
     report_directory = report_directory or "coverage"
-    local('rm -rf ' + report_directory)
+    run('rm -rf ' + report_directory)
     cov.html_report(directory=report_directory)
     print("Coverage reports available in: %s " % report_directory)
 
@@ -83,7 +78,7 @@ def html_coverage_report(report_directory=None):
 @task
 def clean():
     """Find and remove all .pyc and .pyo files"""
-    local('find . -name "*.py[co]" -exec rm {} \;')
+    run('find . -name "*.py[co]" -exec rm {} \;')
 
 
 @task
@@ -97,7 +92,7 @@ def create_migration(initial=False):
         print("Temporarily adding 'south' into INSTALLED_APPS.")
         settings.INSTALLED_APPS.append('south')
 
-    kwargs = dict(initial=True) if literal_eval(str(initial)) else dict(auto=True)
+    kwargs = dict(initial=True) if initial else dict(auto=True)
     run_django_cmd('schemamigration', package['name'], **kwargs)
 
 
@@ -105,7 +100,7 @@ def create_migration(initial=False):
 @require_pip_module('pep8')
 def pep8():
     """Run pep8 on all .py files in ./armstrong"""
-    local('find ./armstrong -name "*.py" | xargs pep8 --repeat', capture=False)
+    run('find ./armstrong -name "*.py" | xargs pep8 --repeat')
 
 
 @task
@@ -137,7 +132,7 @@ def managepy(cmd=None, *args, **kwargs):
 
     if cmd is None:
         sys.stderr.write(
-            red("Usage: fab managepy:<command>,arg1,kwarg=1\n") +
+            "Usage: fab managepy:<command>,arg1,kwarg=1\n" +
             "which translates to: manage.py command arg1 --kwarg=1\n")
         sys.exit(1)
     run_django_cmd(cmd, *args, **kwargs)
@@ -152,14 +147,12 @@ def install(editable=True):
     except ImportError:
         pass
     else:
-        with settings(warn_only=True):
-            local("pip uninstall --quiet -y %s" % package['name'], capture=False)
+        run("pip uninstall --quiet -y %s" % package['name'], warn=True)
 
     cmd = "pip install --quiet "
-    cmd += "-e ." if literal_eval(str(editable)) else "."
+    cmd += "-e ." if editable else "."
 
-    with settings(warn_only=True):
-        local(cmd, capture=False)
+    run(cmd, warn=True)
 
 
 @task
@@ -172,10 +165,11 @@ def remove_armstrong():
         if pkg.key.startswith('armstrong') and pkg.key != 'armstrong.dev']
 
     for app in apps:
-        local("pip uninstall -y %s" % app.key)
+        run("pip uninstall -y %s" % app.key)
 
     if apps:
-        print("Note: this hasn't removed other dependencies installed by "
+        print(
+            "Note: this hasn't removed other dependencies installed by "
             "these components. There's no substitute for a fresh virtualenv.")
     else:
         print("No Armstrong components to remove.")

@@ -14,16 +14,16 @@ Installation
 Usage
 -----
 Most Armstrong components already have the necessary configuration to use these
-Dev tools. Type ``fab -l`` to see a list of all of the commands.
+Dev tools. Type ``invoke --list`` to see a list of all of the commands.
 
 If you are creating a new component (or perhaps updating one that uses
 the older, pre 2.0 Dev tools), you'll need these next two steps.
 
-1. Create a ``fabfile.py`` and add the following::
+1. Create a ``tasks.py`` and add the following::
 
-    from armstrong.dev.fabfile import *
+    from armstrong.dev.tasks import *
 
-    # any additional Fabric commands
+    # any additional Invoke commands
     # ...
 
 2. Create an ``env_settings.py`` and add the following::
@@ -40,31 +40,30 @@ This version offers an easier and more standard way to run a Django
 environment with a component's specific settings, either from the
 commandline or via import.
 
-It provides an "a la carte" requirements approach. Meaning that if you run a
-Fabric command that needs a package that isn't installed, it will prompt you
+It provides an "a la carte" requirements approach. Meaning that if you run an
+Invoke command that needs a package that isn't installed, it will prompt you
 to install it instead of requiring everything up-front. This allows for much
 faster virtualenv creation (which saves considerable time in testing) and
 doesn't pollute your virtualenv with packages for features you don't use.
 
 ``test`` and ``coverage`` will work better with automated test tools like
-TravisCI and Tox. These commands also now work like Django's native test
-command so that you can pass arguments for running selective tests, i.e::
+TravisCI and Tox.::
 
-	fab test [<app name>[.<test case>[.<test name>]]]
+	invoke test
 
 Settings are now defined in the normal Django style in an ``env_settings.py``
-file instead of as a dict within the Fabric config. It's not called
-"settings.py" to make it clearer that these are settings for the development
-and testing of this component, not necessarily values to copy/paste for
-incorporating the component into other projects.
+file instead of as a dict within the tasks file. It's not called "settings.py"
+to make it clearer that these are settings for the development and testing
+of this component, not necessarily values to copy/paste for incorporating
+the component into other projects.
 
 
 Backward incompatible changes in 2.0
 ------------------------------------
 * ``env_settings.py`` is necessary and contains the settings that
-  ``fabfile.py`` used to have.
+  ``tasks.py`` used to have.
 
-* ``fabfile.py`` imports from a different place and no longer defines the
+* ``tasks.py`` imports from a different place and no longer defines the
   settings configurations.
 
 Not required but as long as you are reviewing the general state of things,
