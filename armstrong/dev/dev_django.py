@@ -99,18 +99,19 @@ def run_django_cmd(cmd, *args, **kwargs):
 
 # Commandline access
 @load_django_settings
-def run_django_cli():
-    args = sys.argv[2:]
+def run_django_cli(argv=None):
+    argv = argv or sys.argv
+    args = argv[2:]
 
-    if len(sys.argv) > 1 and sys.argv[1] == "test":
+    if len(argv) > 1 and argv[1] == "test":
         # anything not a flag (e.g. -v, --version) is treated as a named test
         # (it'll be a short list so iterating it twice is okay)
-        args = [arg for arg in sys.argv[2:] if arg.startswith('-')]
-        test_labels = [arg for arg in sys.argv[2:] if not arg.startswith('-')]
+        args = [arg for arg in argv[2:] if arg.startswith('-')]
+        test_labels = [arg for arg in argv[2:] if not arg.startswith('-')]
         args = determine_test_args(test_labels) + args
 
     from django.core.management import execute_from_command_line
-    execute_from_command_line(sys.argv[:2] + args)
+    execute_from_command_line(argv[:2] + args)
 
 
 if __name__ == "__main__":
