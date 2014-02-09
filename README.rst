@@ -47,9 +47,16 @@ faster virtualenv creation (which saves considerable time in testing) and
 doesn't pollute your virtualenv with packages for features you don't use.
 
 ``test`` and ``coverage`` will work better with automated test tools like
-TravisCI and Tox.::
+TravisCI and Tox. These commands also now work like Django's native test
+command so that you can pass arguments for running selective tests. Due to
+Invoke's argument passing, we need to include any optional args via an
+``--extra`` param, i.e.::
 
-	invoke test
+  invoke test --extra [<app name>[.<test case>[.<test name>]]]
+
+  # enclose multiple args in quotes
+  # kwargs need to use "=" with no spaces (our limitation, not Invoke's)
+  invoke test --extra "--verbosity=2 [<app name>[.<test case>[.<test name>]]]"
 
 Settings are now defined in the normal Django style in an ``env_settings.py``
 file instead of as a dict within the tasks file. It's not called "settings.py"

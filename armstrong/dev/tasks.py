@@ -101,37 +101,30 @@ def pep8():
 
 @task
 @require_self
-def test(*args, **kwargs):
+def test(extra=None):
     """Test this component via `manage.py test`"""
-    run_django_cmd('test', *args, **kwargs)
+    return managepy('test', extra)
 
 
 @task
 @require_self
 @require_pip_module('coverage')
-def coverage(*args, **kwargs):
+def coverage(coverage_dir=None, extra=None):
     """Test this project with coverage reports"""
-
-    # Option to pass in the coverage report directory
-    coverage_dir = kwargs.pop('coverage_dir', None)
 
     try:
         with html_coverage_report(coverage_dir):
-            run_django_cmd('test', *args, **kwargs)
+            return test(extra)
     except (ImportError, EnvironmentError):
         sys.exit(1)
 
 
 @task
-def managepy(cmd=None, *args, **kwargs):
+def managepy(cmd, extra=None):
     """Run manage.py using this component's specific Django settings"""
 
-    if cmd is None:
-        sys.stderr.write(
-            "Usage: fab managepy:<command>,arg1,kwarg=1\n" +
-            "which translates to: manage.py command arg1 --kwarg=1\n")
-        sys.exit(1)
-    run_django_cmd(cmd, *args, **kwargs)
+    extra = extra.split() if extra else []
+    run_django_cmd(cmd, *extra)
 
 
 @task
