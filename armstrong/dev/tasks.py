@@ -21,6 +21,12 @@ import json
 package = json.load(open("./package.json"))
 
 
+HELP_TEXT_MANAGEPY = 'any command that `manage.py` normally takes, including "help"'
+HELP_TEXT_EXTRA = 'include any arguments this method can normally take. ' \
+    'multiple args need quotes, e.g. --extra "test1 test2 --verbosity=2"'
+HELP_TEXT_REPORTS = 'directory to store coverage reports, default: "coverage"'
+
+
 @decorator
 def require_self(func, *args, **kwargs):
     """Decorator to require that this component be installed"""
@@ -99,27 +105,27 @@ def pep8():
     run('find ./armstrong -name "*.py" | xargs pep8 --repeat')
 
 
-@task
+@task(help=dict(extra=HELP_TEXT_EXTRA))
 @require_self
 def test(extra=None):
     """Test this component via `manage.py test`"""
     return managepy('test', extra)
 
 
-@task
+@task(help=dict(reportdir=HELP_TEXT_REPORTS, extra=HELP_TEXT_EXTRA))
 @require_self
 @require_pip_module('coverage')
-def coverage(coverage_dir=None, extra=None):
+def coverage(reportdir=None, extra=None):
     """Test this project with coverage reports"""
 
     try:
-        with html_coverage_report(coverage_dir):
+        with html_coverage_report(reportdir):
             return test(extra)
     except (ImportError, EnvironmentError):
         sys.exit(1)
 
 
-@task
+@task(help=dict(cmd=HELP_TEXT_MANAGEPY, extra=HELP_TEXT_EXTRA))
 def managepy(cmd, extra=None):
     """Run manage.py using this component's specific Django settings"""
 
@@ -146,7 +152,7 @@ def install(editable=True):
 
 @task
 def remove_armstrong():
-    """Remove all Armstrong components (except for dev) from this environment"""
+    """Remove all Armstrong components (except for Dev) from this environment"""
 
     from pip.util import get_installed_distributions
     pkgs = get_installed_distributions(local_only=True, include_editables=True)
