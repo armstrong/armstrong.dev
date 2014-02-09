@@ -8,7 +8,7 @@ from invoke import task, run
 # need so @task can build out CLI arguments properly
 from decorator import decorator
 
-from armstrong.dev.dev_django import run_django_cmd, DjangoSettings
+from armstrong.dev.dev_django import run_django_cmd, run_django_cli, DjangoSettings
 
 
 __all__ = [
@@ -124,7 +124,7 @@ def managepy(cmd, extra=None):
     """Run manage.py using this component's specific Django settings"""
 
     extra = extra.split() if extra else []
-    run_django_cmd(cmd, *extra)
+    run_django_cli(['invoke', cmd] + extra)
 
 
 @task

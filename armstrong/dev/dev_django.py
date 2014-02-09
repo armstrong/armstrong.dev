@@ -5,7 +5,7 @@ import threading
 from functools import wraps
 
 
-__all__ = ['run_django_cmd', 'DjangoSettings']
+__all__ = ['run_django_cmd', 'run_django_cli', 'DjangoSettings']
 
 
 class DjangoSettings(object):
