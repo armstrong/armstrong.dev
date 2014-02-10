@@ -21,7 +21,7 @@ DATABASES = {
 
 import django
 if django.VERSION >= (1, 6):  # use the old test runner for now
-    TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
+    TESTED_APPS = ["%s.tests" % package['name']]
 
 #
 # A component may override settings by creating an `env_settings.py`

@@ -54,6 +54,9 @@ Invoke's argument passing, we need to include any optional args via an
 
   invoke test --extra [<app name>[.<test case>[.<test name>]]]
 
+  # or in Django 1.6
+  invoke test --extra [<path.to.app>[.<test module>.<test case>[.<test name>]]]
+
   # enclose multiple args in quotes
   # kwargs need to use "=" with no spaces (our limitation, not Invoke's)
   invoke test --extra "--verbosity=2 [<app name>[.<test case>[.<test name>]]]"
