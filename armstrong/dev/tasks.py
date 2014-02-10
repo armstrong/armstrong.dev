@@ -1,17 +1,15 @@
 import sys
 from os.path import dirname
-from ast import literal_eval
-from functools import wraps
 from contextlib import contextmanager
 
-from fabric.api import local, settings
-from fabric.colors import yellow, red
-from fabric.decorators import task
+from invoke import task, run
 
+# Decorator keeps the function signature and argspec intact, which we
+# need so @task can build out CLI arguments properly
+from decorator import decorator
 
-from armstrong.dev.dev_django import run_django_cmd, DjangoSettings
+from armstrong.dev.dev_django import run_django_cmd, run_django_cli, DjangoSettings
 
-FABRIC_TASK_MODULE = True
 
 __all__ = [
     "clean", "create_migration", "pep8", "managepy",
@@ -23,40 +21,39 @@ import json
 package = json.load(open("./package.json"))
 
 
-def require_self(func=None):
+HELP_TEXT_MANAGEPY = 'any command that `manage.py` normally takes, including "help"'
+HELP_TEXT_EXTRA = 'include any arguments this method can normally take. ' \
+    'multiple args need quotes, e.g. --extra "test1 test2 --verbosity=2"'
+HELP_TEXT_REPORTS = 'directory to store coverage reports, default: "coverage"'
+
+
+@decorator
+def require_self(func, *args, **kwargs):
     """Decorator to require that this component be installed"""
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                __import__(package['name'])
-            except ImportError:
-                sys.stderr.write(
-                    red("This component needs to be installed first. Run ") +
-                    yellow("`fab install`\n"))
-                sys.exit(1)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator if not func else decorator(func)
+    try:
+        __import__(package['name'])
+    except ImportError:
+        sys.stderr.write(
+            "This component needs to be installed first. Run " +
+            "`invoke install`\n")
+        sys.exit(1)
+    return func(*args, **kwargs)
 
 
 def require_pip_module(module):
     """Decorator to check for a module and helpfully exit if it's not found"""
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                __import__(module)
-            except ImportError:
-                sys.stderr.write(
-                    yellow("`pip install %s` to enable this feature\n" % module))
-                sys.exit(1)
-            else:
-                return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    def wrapper(func, *args, **kwargs):
+        try:
+            __import__(module)
+        except ImportError:
+            sys.stderr.write(
+                "`pip install %s` to enable this feature\n" % module)
+            sys.exit(1)
+        else:
+            return func(*args, **kwargs)
+    return decorator(wrapper)
 
 
 @contextmanager
@@ -75,7 +72,7 @@ def html_coverage_report(report_directory=None):
 
     # Write results
     report_directory = report_directory or "coverage"
-    local('rm -rf ' + report_directory)
+    run('rm -rf ' + report_directory)
     cov.html_report(directory=report_directory)
     print("Coverage reports available in: %s " % report_directory)
 
@@ -83,7 +80,7 @@ def html_coverage_report(report_directory=None):
 @task
 def clean():
     """Find and remove all .pyc and .pyo files"""
-    local('find . -name "*.py[co]" -exec rm {} \;')
+    run('find . -name "*.py[co]" -exec rm {} \;')
 
 
 @task
@@ -97,7 +94,7 @@ def create_migration(initial=False):
         print("Temporarily adding 'south' into INSTALLED_APPS.")
         settings.INSTALLED_APPS.append('south')
 
-    kwargs = dict(initial=True) if literal_eval(str(initial)) else dict(auto=True)
+    kwargs = dict(initial=True) if initial else dict(auto=True)
     run_django_cmd('schemamigration', package['name'], **kwargs)
 
 
@@ -105,42 +102,35 @@ def create_migration(initial=False):
 @require_pip_module('pep8')
 def pep8():
     """Run pep8 on all .py files in ./armstrong"""
-    local('find ./armstrong -name "*.py" | xargs pep8 --repeat', capture=False)
+    run('find ./armstrong -name "*.py" | xargs pep8 --repeat')
 
 
-@task
+@task(help=dict(extra=HELP_TEXT_EXTRA))
 @require_self
-def test(*args, **kwargs):
+def test(extra=None):
     """Test this component via `manage.py test`"""
-    run_django_cmd('test', *args, **kwargs)
+    return managepy('test', extra)
 
 
-@task
+@task(help=dict(reportdir=HELP_TEXT_REPORTS, extra=HELP_TEXT_EXTRA))
 @require_self
 @require_pip_module('coverage')
-def coverage(*args, **kwargs):
+def coverage(reportdir=None, extra=None):
     """Test this project with coverage reports"""
 
-    # Option to pass in the coverage report directory
-    coverage_dir = kwargs.pop('coverage_dir', None)
-
     try:
-        with html_coverage_report(coverage_dir):
-            run_django_cmd('test', *args, **kwargs)
+        with html_coverage_report(reportdir):
+            return test(extra)
     except (ImportError, EnvironmentError):
         sys.exit(1)
 
 
-@task
-def managepy(cmd=None, *args, **kwargs):
+@task(help=dict(cmd=HELP_TEXT_MANAGEPY, extra=HELP_TEXT_EXTRA))
+def managepy(cmd, extra=None):
     """Run manage.py using this component's specific Django settings"""
 
-    if cmd is None:
-        sys.stderr.write(
-            red("Usage: fab managepy:<command>,arg1,kwarg=1\n") +
-            "which translates to: manage.py command arg1 --kwarg=1\n")
-        sys.exit(1)
-    run_django_cmd(cmd, *args, **kwargs)
+    extra = extra.split() if extra else []
+    run_django_cli(['invoke', cmd] + extra)
 
 
 @task
@@ -152,19 +142,17 @@ def install(editable=True):
     except ImportError:
         pass
     else:
-        with settings(warn_only=True):
-            local("pip uninstall --quiet -y %s" % package['name'], capture=False)
+        run("pip uninstall --quiet -y %s" % package['name'], warn=True)
 
     cmd = "pip install --quiet "
-    cmd += "-e ." if literal_eval(str(editable)) else "."
+    cmd += "-e ." if editable else "."
 
-    with settings(warn_only=True):
-        local(cmd, capture=False)
+    run(cmd, warn=True)
 
 
 @task
 def remove_armstrong():
-    """Remove all Armstrong components (except for dev) from this environment"""
+    """Remove all Armstrong components (except for Dev) from this environment"""
 
     from pip.util import get_installed_distributions
     pkgs = get_installed_distributions(local_only=True, include_editables=True)
@@ -172,10 +160,11 @@ def remove_armstrong():
         if pkg.key.startswith('armstrong') and pkg.key != 'armstrong.dev']
 
     for app in apps:
-        local("pip uninstall -y %s" % app.key)
+        run("pip uninstall -y %s" % app.key)
 
     if apps:
-        print("Note: this hasn't removed other dependencies installed by "
+        print(
+            "Note: this hasn't removed other dependencies installed by "
             "these components. There's no substitute for a fresh virtualenv.")
     else:
         print("No Armstrong components to remove.")
