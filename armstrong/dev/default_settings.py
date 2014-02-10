@@ -10,7 +10,6 @@ app_name = package['name'].rsplit('.', 1)[1]
 #
 # Default settings
 #
-TESTED_APPS = [app_name]
 INSTALLED_APPS = [package['name']]
 DATABASES = {
     "default": {
@@ -18,10 +17,7 @@ DATABASES = {
         "NAME": 'mydatabase'
     }
 }
-
-import django
-if django.VERSION >= (1, 6):  # use the old test runner for now
-    TESTED_APPS = ["%s.tests" % package['name']]
+TEST_RUNNER = "armstrong.dev.tests.runner.ArmstrongDiscoverRunner"
 
 #
 # A component may override settings by creating an `env_settings.py`

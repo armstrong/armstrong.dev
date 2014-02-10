@@ -76,23 +76,9 @@ def load_django_settings(func):
     return wrapper
 
 
-def determine_test_args(test_labels):
-    """
-    Limit testing to settings.TESTED_APPS if available while behaving
-    exactly like `manage.py test` and retaining Django's ability to
-    explicitly provide test apps/cases/methods on the commandline.
-
-    """
-    settings = DjangoSettings()
-    return test_labels or getattr(settings, 'TESTED_APPS', [])
-
-
 # Import access
 @load_django_settings
 def run_django_cmd(cmd, *args, **kwargs):
-    if cmd == "test":
-        args = determine_test_args(args)
-
     from django.core.management import call_command
     return call_command(cmd, *args, **kwargs)
 
@@ -101,17 +87,9 @@ def run_django_cmd(cmd, *args, **kwargs):
 @load_django_settings
 def run_django_cli(argv=None):
     argv = argv or sys.argv
-    args = argv[2:]
-
-    if len(argv) > 1 and argv[1] == "test":
-        # anything not a flag (e.g. -v, --version) is treated as a named test
-        # (it'll be a short list so iterating it twice is okay)
-        args = [arg for arg in argv[2:] if arg.startswith('-')]
-        test_labels = [arg for arg in argv[2:] if not arg.startswith('-')]
-        args = determine_test_args(test_labels) + args
 
     from django.core.management import execute_from_command_line
-    execute_from_command_line(argv[:2] + args)
+    execute_from_command_line(argv)
 
 
 if __name__ == "__main__":

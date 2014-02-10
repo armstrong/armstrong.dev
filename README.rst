@@ -52,14 +52,11 @@ command so that you can pass arguments for running selective tests. Due to
 Invoke's argument passing, we need to include any optional args via an
 ``--extra`` param, i.e.::
 
-  invoke test --extra [<app name>[.<test case>[.<test name>]]]
-
-  # or in Django 1.6
   invoke test --extra [<path.to.app>[.<test module>.<test case>[.<test name>]]]
 
   # enclose multiple args in quotes
   # kwargs need to use "=" with no spaces (our limitation, not Invoke's)
-  invoke test --extra "--verbosity=2 [<app name>[.<test case>[.<test name>]]]"
+  invoke test --extra "--verbosity=2 <path.to.app.test1> <path.to.app.test2>"
 
 Settings are now defined in the normal Django style in an ``env_settings.py``
 file instead of as a dict within the tasks file. It's not called "settings.py"
