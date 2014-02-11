@@ -2,7 +2,11 @@ import sys
 from os.path import dirname
 from contextlib import contextmanager
 
-from invoke import task, run
+try:
+    from invoke import task, run
+except ImportError:
+    sys.stderr.write("Tasks require Invoke: `pip install invoke`\n")
+    sys.exit(1)
 
 # Decorator keeps the function signature and argspec intact, which we
 # need so @task can build out CLI arguments properly
