@@ -8,7 +8,7 @@ from invoke import task, run
 # need so @task can build out CLI arguments properly
 from decorator import decorator
 
-from armstrong.dev.dev_django import run_django_cmd, run_django_cli, DjangoSettings
+from .dev_django import run_django_cmd, run_django_cli, DjangoSettings
 
 
 __all__ = [
