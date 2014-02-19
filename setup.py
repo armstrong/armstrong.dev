@@ -30,7 +30,6 @@ setup_kwargs = {
     "packages": find_packages(exclude=["*.tests", "*.tests.*"]),
     "namespace_packages": NAMESPACE_PACKAGES,
     "include_package_data": True,
-    "zip_safe": False,
     "classifiers": [
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
