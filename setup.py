@@ -3,8 +3,9 @@ setup.py file for building armstrong components.
 
 Nothing in this file should need to be edited, please see accompanying
 package.json file if you need to adjust metadata about this package.
-"""
 
+"""
+import os
 import json
 from setuptools import setup, find_packages
 
@@ -21,6 +22,8 @@ def generate_namespaces(package):
     NAMESPACE_PACKAGES.append(new_package)
 generate_namespaces(info["name"])
 
+if os.path.exists("MANIFEST"):
+    os.unlink("MANIFEST")
 
 setup_kwargs = {
     "author": "Bay Citizen & Texas Tribune",
