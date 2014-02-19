@@ -3,21 +3,81 @@ armstrong.dev
 Tools and such for handling development of Armstrong applications
 
 This package contains some of the various helpers needed to do development work
-on the Armstrong packages.  If you're not actively developing, or working with
+on the Armstrong packages. If you're not actively developing, or working with
 development versions of Armstrong, you probably don't need this package.
+
 
 Installation
 ------------
-1. ``pip install armstrong.dev``
+
+1. ``pip install armstrong.dev invoke`` **OR**, if all you are doing
+is testing, ``pip install tox``
+
+`Invoke`_ is not strictly required. ArmDev is as lean as possible to support
+fast virtualenv creation both so you can get on with your work and so
+multi-environment testing tools like TravisCI and Tox will complete ASAP.
+If testing is all you are doing, you can use ``tox`` or 
+``python -m armstrong.dev.dev_django test``.
+
+Many of the Invoke tasks have their own package requirements and they will
+nicely notify you if something they require needs to be installed.
+
+.. _Invoke: http://docs.pyinvoke.org/en/latest/index.html
 
 
 Usage
 -----
 Most Armstrong components already have the necessary configuration to use these
-Dev tools. Type ``invoke --list`` to see a list of all of the commands.
+Dev tools. Specifically, components need ``tasks.py`` and ``env_settings.py``
+files. Assuming these are present:
 
-If you are creating a new component (or perhaps updating one that uses
-the older, pre 2.0 Dev tools), you'll need these next two steps.
+``invoke --list``
+  to see a list of all available commands
+
+``invoke --help <cmd>``
+  for help on a specific command
+
+Several of the tasks take an optional ``--extra`` argument that is used as a
+catch-all way of passing arbitrary arguments to the underlying command. Invoke
+cannot handle arbitrary args (like Fabric 1.x could) so this is our workaround.
+Two general rules: 1) enclose multiple args in quotes 2) kwargs need to use
+"=" with no spaces (our limitation, not Invoke's). Example:
+``invoke test --extra "--verbosity=2 <path.to.app.test1> <path.to.app.test2>"``
+
+``invoke install [--editable]``
+  to "pip install" the component, by default as an `editable`_ install. For
+  a regular install, use ``--no-editable`` or ``--editable=False``.
+
+``invoke test [--extra ...]``
+  to run tests where --extra handles anything the normal Django
+  "manage.py test" command accepts.
+
+``invoke coverage [--reportdir=<directory>] [--extra ...]``
+  for running test coverage. --extra works the same as in "invoke test" passing
+  arbitrary args to the underlying test command. --reportdir is where the HTML
+  report will be created; by default this directory is named "coverage".
+
+``invoke managepy <cmd> [--extra ...]``
+  to run any Django "manage.py" command where --extra handles any arbitrary
+  args. Example: ``invoke managepy shell`` or 
+  ``invoke managepy runserver --extra 9001``
+
+``invoke create_migration [--initial]``
+  to create a South migration for the component. An "auto" migration is
+  default if the --initial flag is not used.
+
+There are other commands as well, but these are the most useful. Remember
+that individual components may provide additional Invoke tasks as well. So
+run ``invoke --list`` to discover them all.
+
+
+.. _editable: http://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs
+
+
+Component Setup
+---------------
+If you are creating a new Armstrong component or updating one that uses the
+pre-2.0 ArmDev, you'll need to create (or port to) these two files:
 
 1. Create a ``tasks.py`` and add the following::
 
@@ -31,11 +91,31 @@ the older, pre 2.0 Dev tools), you'll need these next two steps.
     from armstrong.dev.default_settings import *
 
     # any additional settings
+    # it's likely you'll need to extend the list of INSTALLED_APPS
     # ...
+
+Not required but as long as you are reviewing the general state of things,
+take care of these too!
+
+- Review the ``requirements`` files.
+- Add a ``tox.ini`` file.
+- Drop Lettuce tests and requirements.
+- Review the TravisCI configuration.
+- Review ``.gitignore``. You might want to ignore these::
+
+	.tox/
+	coverage*/
+	*.egg-info
 
 
 Notable changes in 2.0
 ----------------------
+Setuptools is now explicitly used/required instead of Distutils.
+
+Invoke replaces Fabric for a leaner install without the SSH and crypto
+stuff. Invoke is still pre-1.0 release so we might have some adjustment
+to do later.
+
 This version offers an easier and more standard way to run a Django
 environment with a component's specific settings, either from the
 commandline or via import.
@@ -48,15 +128,8 @@ doesn't pollute your virtualenv with packages for features you don't use.
 
 ``test`` and ``coverage`` will work better with automated test tools like
 TravisCI and Tox. These commands also now work like Django's native test
-command so that you can pass arguments for running selective tests. Due to
-Invoke's argument passing, we need to include any optional args via an
-``--extra`` param, i.e.::
-
-  invoke test --extra [<path.to.app>[.<test module>.<test case>[.<test name>]]]
-
-  # enclose multiple args in quotes
-  # kwargs need to use "=" with no spaces (our limitation, not Invoke's)
-  invoke test --extra "--verbosity=2 <path.to.app.test1> <path.to.app.test2>"
+command so that you can pass arguments for running selective tests or
+changing the output verbosity.
 
 Settings are now defined in the normal Django style in an ``env_settings.py``
 file instead of as a dict within the tasks file. It's not called "settings.py"
@@ -64,40 +137,24 @@ to make it clearer that these are settings for the development and testing
 of this component, not necessarily values to copy/paste for incorporating
 the component into other projects.
 
-
-Backward incompatible changes in 2.0
-------------------------------------
-* ``env_settings.py`` is necessary and contains the settings that
-  ``tasks.py`` used to have.
-
-* ``tasks.py`` imports from a different place and no longer defines the
-  settings configurations.
-
-Not required but as long as you are reviewing the general state of things,
-take care of these things too!
-
-* Review the ``requirements`` files.
-* Add a ``tox.ini`` file.
-* Review or add a TravisCI configuration.
-* Review ``.gitignore``. You might want to ignore these::
-
-	.tox/
-	coverage*/
-	*.egg-info
+The full list of changes and backward incompatibilties is available
+in **CHANGES.rst**.
 
 
 Contributing
 ------------
+Development occurs on Github. Participation is welcome!
 
-* Create something awesome -- make the code better, add some functionality,
-  whatever (this is the hardest part).
-* `Fork it`_
-* Create a topic branch to house your changes
-* Get all of your commits in the new topic branch
-* Submit a `Pull Request`_
+* Found a bug? File it on `Github Issues`_. Include as much detail as you
+  can and make sure to list the specific component since we use a centralized,
+  project-wide issue tracker.
+* Have code to submit? Fork the repo, consolidate your changes on a topic
+  branch and create a `pull request`_.
+* Questions, need help, discussion? Use our `Google Group`_ mailing list.
 
-.. _Pull Request: https://help.github.com/articles/using-pull-requests
-.. _Fork it: https://help.github.com/articles/fork-a-repo
+.. _Github Issues: https://github.com/armstrong/armstrong/issues
+.. _pull request: http://help.github.com/pull-requests/
+.. _Google Group: http://groups.google.com/group/armstrongcms
 
 
 State of Project
@@ -107,14 +164,11 @@ organization.  It is the result of a collaboration between the `Texas Tribune`_
 and `The Center for Investigative Reporting`_ and a grant from the
 `John S. and James L. Knight Foundation`_.
 
-To follow development, be sure to join the `Google Group`_.
-
 ``armstrong.dev`` is part of the `Armstrong`_ project. You're
 probably looking for that.
 
 
-.. _Armstrong: http://www.armstrongcms.org/
+.. _Texas Tribune: http://www.texastribune.org/
 .. _The Center for Investigative Reporting: http://cironline.org/
 .. _John S. and James L. Knight Foundation: http://www.knightfoundation.org/
-.. _Texas Tribune: http://www.texastribune.org/
-.. _Google Group: http://groups.google.com/group/armstrongcms
+.. _Armstrong: http://www.armstrongcms.org/
