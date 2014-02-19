@@ -1,7 +1,3 @@
-import pkg_resources
-pkg_resources.declare_namespace(__name__)
-
-
 from contextlib import contextmanager
 try:
     import coverage as coverage
