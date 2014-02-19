@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import os
 import sys
 import threading
 from functools import wraps
@@ -43,9 +42,6 @@ class DjangoSettings(object):
             raise ImportError(
                 "%s. Check to see if Django is installed in your "
                 "virtualenv." % e)
-
-        # Add the component's directory to the path so we can import from it
-        sys.path.append(os.getcwd())
 
         try:
             import env_settings as package_settings
