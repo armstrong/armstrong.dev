@@ -1,10 +1,6 @@
-"""
-setup.py file for building armstrong components.
-
-Nothing in this file should need to be edited, please see accompanying
-package.json file if you need to adjust metadata about this package.
-
-"""
+# Nothing in this file should need to be edited.
+#   Use package.json to adjust metadata about this package.
+#   Use MANIFEST.in to include package-specific data files.
 import os
 import json
 from setuptools import setup, find_packages
@@ -27,7 +23,7 @@ setup_kwargs = {
     "author": "Bay Citizen & Texas Tribune",
     "author_email": "dev@armstrongcms.org",
     "url": "http://github.com/armstrong/%s/" % info["name"],
-    "packages": find_packages(exclude=["*.tests", "*.tests.*"]),
+    "packages": find_packages(),
     "namespace_packages": NAMESPACE_PACKAGES,
     "include_package_data": True,
     "classifiers": [
