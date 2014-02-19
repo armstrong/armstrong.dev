@@ -11,16 +11,14 @@ from setuptools import setup, find_packages
 
 
 info = json.load(open("./package.json"))
-NAMESPACE_PACKAGES = []
 
 
-# TODO: simplify this process
 def generate_namespaces(package):
-    new_package = ".".join(package.split(".")[0:-1])
-    if new_package.count(".") > 0:
-        generate_namespaces(new_package)
-    NAMESPACE_PACKAGES.append(new_package)
-generate_namespaces(info["name"])
+    i = package.count(".")
+    while i:
+        yield package.rsplit(".", i)[0]
+        i -= 1
+NAMESPACE_PACKAGES = list(generate_namespaces(info['name']))
 
 if os.path.exists("MANIFEST"):
     os.unlink("MANIFEST")
