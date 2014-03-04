@@ -20,20 +20,21 @@ if os.path.exists("MANIFEST"):
     os.unlink("MANIFEST")
 
 setup_kwargs = {
-    "author": "Bay Citizen & Texas Tribune",
+    "author": "Texas Tribune & The Center for Investigative Reporting",
     "author_email": "dev@armstrongcms.org",
     "url": "http://github.com/armstrong/%s/" % info["name"],
     "packages": find_packages(),
     "namespace_packages": NAMESPACE_PACKAGES,
     "include_package_data": True,
     "classifiers": [
-        'Development Status :: 3 - Alpha',
-        'Environment :: Web Environment',
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Topic :: Software Development :: Testing',
     ],
 }
 
