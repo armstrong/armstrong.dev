@@ -19,6 +19,8 @@ DATABASES = {
 }
 TEST_RUNNER = "armstrong.dev.tests.runner.ArmstrongDiscoverRunner"
 
+COVERAGE_EXCLUDE_FILES = ['*/migrations/*']
+
 #
 # A component may override settings by creating an `env_settings.py`
 # file in its root directory that imports from this file.

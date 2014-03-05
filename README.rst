@@ -7,8 +7,8 @@ on the Armstrong packages. If you're not actively developing, or working with
 development versions of Armstrong, you probably don't need this package.
 
 
-Installation
-------------
+Installation & Configuration
+----------------------------
 
 1. ``pip install armstrong.dev invoke`` **OR**, if all you are doing
 is testing, ``pip install tox``
@@ -21,6 +21,12 @@ If testing is all you are doing, you can use ``tox`` or
 
 Many of the Invoke tasks have their own package requirements and they will
 nicely notify you if something they require needs to be installed.
+
+**Optional Settings:** (Used in ``env_settings.py``)
+
+``COVERAGE_EXCLUDE_FILES = ['*/migrations/*']``
+  A list of filename patterns for files to exclude during coverage testing.
+  Individual components are free to extend or replace this setting.
 
 .. _Invoke: http://docs.pyinvoke.org/en/latest/index.html
 

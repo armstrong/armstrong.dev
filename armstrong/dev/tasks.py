@@ -66,9 +66,12 @@ def html_coverage_report(report_directory=None):
     module = __import__(package['name'], fromlist=[package_parent])
     base_path = dirname(module.__file__)
 
+    settings = DjangoSettings()
+    omit = getattr(settings, 'COVERAGE_EXCLUDE_FILES', None)
+
     import coverage as coverage_api
     print("Coverage is covering: %s" % base_path)
-    cov = coverage_api.coverage(branch=True, source=[base_path])
+    cov = coverage_api.coverage(branch=True, source=[base_path], omit=omit)
 
     cov.start()
     yield
