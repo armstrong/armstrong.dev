@@ -26,7 +26,7 @@ CHANGES
 - **Backward incompatible:** individual components need to specify the
   ``fudge`` requirement if they need it.
 
-- **Backward incompatible:** Fix ``generate_random_users()`` and turn it 
+- **Backward incompatible:** Fix ``generate_random_users()`` and turn it
   into a generator.
 
 - **Backward incompatible:** remove ``concrete`` decorators. The Armstrong
@@ -58,7 +58,7 @@ CHANGES
 - Coverage testing is ready for multiple environments at once (like with Tox).
 
 - Use (and backport) the Django 1.6 test runner. This standardizes testing
-  in favor of the newest method so we don't need to be cognisant of the current
+  in favor of the newest method so we don't need to be cognizant of the current
   Django version as we test across multiple versions. Bonus: because the new
   runner is explicit about test discovery, drop the ``TESTED_APP`` code.
 

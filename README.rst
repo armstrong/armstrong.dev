@@ -9,15 +9,18 @@ development versions of Armstrong, you probably don't need this package.
 
 Installation & Configuration
 ----------------------------
+If you are just running tests for a component, Tox will grab everything it
+needs including ArmDev.
 
-1. ``pip install armstrong.dev invoke`` **OR**, if all you are doing
-is testing, ``pip install tox``
+- ``pip install tox`` and run ``tox``
+
+Otherwise:
+
+- ``pip install armstrong.dev invoke``
 
 `Invoke`_ is not strictly required. ArmDev is as lean as possible to support
-fast virtualenv creation both so you can get on with your work and so
-multi-environment testing tools like TravisCI and Tox will complete ASAP.
-If testing is all you are doing, you can use ``tox`` or 
-``python -m armstrong.dev.dev_django test``.
+fast virtualenv creation so multi-environment testing tools like TravisCI
+and Tox will complete ASAP.
 
 Many of the Invoke tasks have their own package requirements and they will
 nicely notify you if something they require needs to be installed.
@@ -65,7 +68,7 @@ Two general rules: 1) enclose multiple args in quotes 2) kwargs need to use
 
 ``invoke managepy <cmd> [--extra ...]``
   to run any Django "manage.py" command where --extra handles any arbitrary
-  args. Example: ``invoke managepy shell`` or 
+  args. Example: ``invoke managepy shell`` or
   ``invoke managepy runserver --extra 9001``
 
 ``invoke create_migration [--initial]``
@@ -103,10 +106,14 @@ pre-2.0 ArmDev, you'll need to create (or port to) these two files:
 Not required but as long as you are reviewing the general state of things,
 take care of these too!
 
-- Review the ``requirements`` files.
-- Add a ``tox.ini`` file.
-- Drop Lettuce tests and requirements.
-- Review the TravisCI configuration.
+- Review the ``requirements`` files
+- Review the TravisCI configuration
+- Drop Lettuce tests and requirements
+- Add a ``tox.ini`` file
+- Review the README text and setup.py metadata
+- Use Setuptools and fix any improper namespacing
+- Stop shipping tests by moving tests/ to the root directory
+- Add a ``CHANGES.rst`` file and include it in the MANIFEST
 - Review ``.gitignore``. You might want to ignore these::
 
 	.tox/
@@ -165,16 +172,13 @@ Development occurs on Github. Participation is welcome!
 
 State of Project
 ----------------
-Armstrong is an open-source news platform that is freely available to any
-organization.  It is the result of a collaboration between the `Texas Tribune`_
+`Armstrong`_ is an open-source news platform that is freely available to any
+organization. It is the result of a collaboration between the `Texas Tribune`_
 and `The Center for Investigative Reporting`_ and a grant from the
-`John S. and James L. Knight Foundation`_.
+`John S. and James L. Knight Foundation`_. Armstrong is available as a
+complete bundle and as individual, stand-alone components.
 
-``armstrong.dev`` is part of the `Armstrong`_ project. You're
-probably looking for that.
-
-
+.. _Armstrong: http://www.armstrongcms.org/
 .. _Texas Tribune: http://www.texastribune.org/
 .. _The Center for Investigative Reporting: http://cironline.org/
 .. _John S. and James L. Knight Foundation: http://www.knightfoundation.org/
-.. _Armstrong: http://www.armstrongcms.org/
