@@ -1,3 +1,13 @@
+"""
+Default settings for Armstrong components running in a dev/test environment
+
+A component may (and might have to) override or supply additional settings
+by creating an `env_settings.py` file in its root directory that imports
+from this file.
+
+    from armstrong.dev.default_settings import *
+
+"""
 # Since we are using configure() we need to manually load the defaults
 from django.conf.global_settings import *
 
@@ -6,10 +16,10 @@ import json
 package = json.load(open("./package.json"))
 app_name = package['name'].rsplit('.', 1)[1]
 
-
 #
-# Default settings
+# Armstrong default settings
 #
+DEBUG = True
 INSTALLED_APPS = [package['name']]
 DATABASES = {
     "default": {
@@ -41,10 +51,3 @@ LOGGING = {
         }
     }
 }
-
-#
-# A component may override settings by creating an `env_settings.py`
-# file in its root directory that imports from this file.
-#
-#     from armstrong.dev.default_settings import *
-#
