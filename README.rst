@@ -113,6 +113,8 @@ take care of these too!
 - Review the README text and setup.py metadata
 - Use Setuptools and fix any improper namespacing
 - Stop shipping tests by moving tests/ to the root directory
+- If the component uses logging, consider namespacing it with
+  ``logger = logging.getLogger(__name__)``.
 - Add a ``CHANGES.rst`` file and include it in the MANIFEST
 - Review ``.gitignore``. You might want to ignore these::
 

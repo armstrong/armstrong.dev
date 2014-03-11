@@ -21,6 +21,27 @@ TEST_RUNNER = "armstrong.dev.tests.runner.ArmstrongDiscoverRunner"
 
 COVERAGE_EXCLUDE_FILES = ['*/migrations/*']
 
+# Add a DEBUG console "armstrong" logger
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'basic': {'format': '%(levelname)s %(module)s--%(message)s'}
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'basic'
+        }
+    },
+    'loggers': {
+        'armstrong': {
+            'level': 'DEBUG',
+            'handlers': ['console']
+        }
+    }
+}
+
 #
 # A component may override settings by creating an `env_settings.py`
 # file in its root directory that imports from this file.
