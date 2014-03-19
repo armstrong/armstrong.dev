@@ -36,7 +36,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'basic': {'format': '%(levelname)s %(module)s--%(message)s'}
+        'basic': {'format': '%(levelname)s %(name)s--%(message)s'}
     },
     'handlers': {
         'console': {
