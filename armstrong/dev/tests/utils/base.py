@@ -1,19 +1,26 @@
 from django.test import TestCase as DjangoTestCase
-import fudge
 from django.db import models
 
-# Backport override_settings from Django 1.4 
+# DEPRECATED remove when we drop Django 1.3 support
 try:
     from django.test.utils import override_settings
 except ImportError:
     from .backports import override_settings
 
+try:  # If the component uses fudge, provide useful shared behavior
+    import fudge
+except ImportError:
+    fudge = False
+
 
 class ArmstrongTestCase(DjangoTestCase):
-    def setUp(self):
-        fudge.clear_expectations()
-        fudge.clear_calls()
-    
+    if fudge:
+        def setUp(self):
+            super(ArmstrongTestCase, self).setUp()
+            fudge.clear_expectations()
+            fudge.clear_calls()
+
+    # DEPRECATED remove when we drop Django 1.3 support
     if not hasattr(DjangoTestCase, 'settings'):
         # backported from Django 1.4
         def settings(self, **kwargs):
@@ -24,7 +31,7 @@ class ArmstrongTestCase(DjangoTestCase):
             .. seealso: https://github.com/django/django/blob/0d670682952fae585ce5c5ec5dc335bd61d66bb2/django/test/testcases.py#L349-354
             """
             return override_settings(**kwargs)
-    
+
     def assertRelatedTo(self, model, field_name, related_model, many=False):
         if many is False:
             through = models.ForeignKey
@@ -46,19 +53,3 @@ class ArmstrongTestCase(DjangoTestCase):
             msg = "%s.%s is not a %s" % (model.__class__.__name__, field_name,
                     field_class.__class__.__name__)
             self.assertTrue(isinstance(field, field_class), msg=msg)
-
-    def assertInContext(self, var_name, other, template_or_context):
-        # TODO: support passing in a straight "context" (i.e., dict)
-        context = template_or_context.context_data
-        self.assertTrue(var_name in context,
-                msg="`%s` not in provided context" % var_name)
-        self.assertEqual(context[var_name], other)
-
-    def assertNone(self, obj, **kwargs):
-        self.assertTrue(obj is None, **kwargs)
-
-    def assertIsA(self, obj, cls, **kwargs):
-        self.assertTrue(isinstance(obj, cls), **kwargs)
-
-    def assertDoesNotHave(self, obj, attr, **kwargs):
-        self.assertFalse(hasattr(obj, attr), **kwargs)

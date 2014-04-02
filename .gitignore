@@ -1,9 +1,10 @@
 *.pyc
 *~
 *.swp
-coverage/*
-build/*
+*.egg-info
+coverage*/
+build/
 mydatabase
-docs/_build/*
+docs/_build/
 MANIFEST
 dist/

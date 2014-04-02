@@ -3,78 +3,184 @@ armstrong.dev
 Tools and such for handling development of Armstrong applications
 
 This package contains some of the various helpers needed to do development work
-on the Armstrong packages.  If you're not actively developing, or working with
+on the Armstrong packages. If you're not actively developing, or working with
 development versions of Armstrong, you probably don't need this package.
+
+
+Installation & Configuration
+----------------------------
+If you are just running tests for a component, Tox will grab everything it
+needs including ArmDev.
+
+- ``pip install tox`` and run ``tox``
+
+Otherwise:
+
+- ``pip install armstrong.dev invoke``
+
+`Invoke`_ is not strictly required. ArmDev is as lean as possible to support
+fast virtualenv creation so multi-environment testing tools like TravisCI
+and Tox will complete ASAP.
+
+Many of the Invoke tasks have their own package requirements and they will
+nicely notify you if something they require needs to be installed.
+
+**Optional Settings:** (Used in ``env_settings.py``)
+
+``COVERAGE_EXCLUDE_FILES = ['*/migrations/*']``
+  A list of filename patterns for files to exclude during coverage testing.
+  Individual components are free to extend or replace this setting.
+
+.. _Invoke: http://docs.pyinvoke.org/en/latest/index.html
+
 
 Usage
 -----
+Most Armstrong components already have the necessary configuration to use these
+Dev tools. Specifically, components need ``tasks.py`` and ``env_settings.py``
+files. Assuming these are present:
 
-Create a `fabfile` (either `fabfile/__init__.py` or simply `fabfile.py`) in
-your project and add the following::
+``invoke --list``
+  to see a list of all available commands
+
+``invoke --help <cmd>``
+  for help on a specific command
+
+Several of the tasks take an optional ``--extra`` argument that is used as a
+catch-all way of passing arbitrary arguments to the underlying command. Invoke
+cannot handle arbitrary args (like Fabric 1.x could) so this is our workaround.
+Two general rules: 1) enclose multiple args in quotes 2) kwargs need to use
+"=" with no spaces (our limitation, not Invoke's). Example:
+``invoke test --extra "--verbosity=2 <path.to.app.test1> <path.to.app.test2>"``
+
+``invoke install [--editable]``
+  to "pip install" the component, by default as an `editable`_ install. For
+  a regular install, use ``--no-editable`` or ``--editable=False``.
+
+``invoke test [--extra ...]``
+  to run tests where --extra handles anything the normal Django
+  "manage.py test" command accepts.
+
+``invoke coverage [--reportdir=<directory>] [--extra ...]``
+  for running test coverage. --extra works the same as in "invoke test" passing
+  arbitrary args to the underlying test command. --reportdir is where the HTML
+  report will be created; by default this directory is named "coverage".
+
+``invoke managepy <cmd> [--extra ...]``
+  to run any Django "manage.py" command where --extra handles any arbitrary
+  args. Example: ``invoke managepy shell`` or
+  ``invoke managepy runserver --extra 9001``
+
+``invoke create_migration [--initial]``
+  to create a South migration for the component. An "auto" migration is
+  default if the --initial flag is not used.
+
+There are other commands as well, but these are the most useful. Remember
+that individual components may provide additional Invoke tasks as well. So
+run ``invoke --list`` to discover them all.
+
+
+.. _editable: http://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs
+
+
+Component Setup
+---------------
+If you are creating a new Armstrong component or updating one that uses the
+pre-2.0 ArmDev, you'll need to create (or port to) these two files:
+
+1. Create a ``tasks.py`` and add the following::
 
     from armstrong.dev.tasks import *
 
+    # any additional Invoke commands
+    # ...
 
-    settings = {
-        "DEBUG": True,
-        # And so on with the keys being the name of the setting and the values
-        # the appropriate value.
-    }
+2. Create an ``env_settings.py`` and add the following::
 
-    main_app = "name.of.your.app"
-    tested_apps ("another_app", main_app, )
+    from armstrong.dev.default_settings import *
+
+    # any additional settings
+    # it's likely you'll need to extend the list of INSTALLED_APPS
+    # ...
+
+Not required but as long as you are reviewing the general state of things,
+take care of these too!
+
+- Review the ``requirements`` files
+- Review the TravisCI configuration
+- Drop Lettuce tests and requirements
+- Add a ``tox.ini`` file
+- Review the README text and setup.py metadata
+- Use Setuptools and fix any improper namespacing
+- Stop shipping tests by moving tests/ to the root directory
+- If the component uses logging, consider namespacing it with
+  ``logger = logging.getLogger(__name__)``.
+- Add a ``CHANGES.rst`` file and include it in the MANIFEST
+- Review ``.gitignore``. You might want to ignore these::
+
+	.tox/
+	coverage*/
+	*.egg-info
 
 
-Now your fabfile will expose the various commands for setting up and running
-your reusable app inside a virtualenv for testing, interacting with via the
-shell, and even running a simple server.
+Notable changes in 2.0
+----------------------
+Setuptools is now explicitly used/required instead of Distutils.
 
-Type ``fab -l`` to see a list of all of the commands.
+Invoke replaces Fabric for a leaner install without the SSH and crypto
+stuff. Invoke is still pre-1.0 release so we might have some adjustment
+to do later.
 
+This version offers an easier and more standard way to run a Django
+environment with a component's specific settings, either from the
+commandline or via import.
 
-Installation
-------------
+It provides an "a la carte" requirements approach. Meaning that if you run an
+Invoke command that needs a package that isn't installed, it will prompt you
+to install it instead of requiring everything up-front. This allows for much
+faster virtualenv creation (which saves considerable time in testing) and
+doesn't pollute your virtualenv with packages for features you don't use.
 
-::
+``test`` and ``coverage`` will work better with automated test tools like
+TravisCI and Tox. These commands also now work like Django's native test
+command so that you can pass arguments for running selective tests or
+changing the output verbosity.
 
-    name="armstrong.dev"
-    pip install -e git://github.com/armstrong/$name#egg=$name
+Settings are now defined in the normal Django style in an ``env_settings.py``
+file instead of as a dict within the tasks file. It's not called "settings.py"
+to make it clearer that these are settings for the development and testing
+of this component, not necessarily values to copy/paste for incorporating
+the component into other projects.
 
-**Note**: This currently relies on a development version of Fabric.  This
-requirement is set to be dropped once Fabric 1.1 is released.  To ensure this
-runs as expected, install the ``tswicegood/fabric`` fork of Fabric:
-
-::
-
-    pip install -e git://github.com/tswicegood/fabric.git#egg=fabric
+The full list of changes and backward incompatibilties is available
+in **CHANGES.rst**.
 
 
 Contributing
 ------------
+Development occurs on Github. Participation is welcome!
 
-* Create something awesome -- make the code better, add some functionality,
-  whatever (this is the hardest part).
-* `Fork it`_
-* Create a topic branch to house your changes
-* Get all of your commits in the new topic branch
-* Submit a `pull request`_
+* Found a bug? File it on `Github Issues`_. Include as much detail as you
+  can and make sure to list the specific component since we use a centralized,
+  project-wide issue tracker.
+* Have code to submit? Fork the repo, consolidate your changes on a topic
+  branch and create a `pull request`_.
+* Questions, need help, discussion? Use our `Google Group`_ mailing list.
 
-
-License
--------
-Copyright 2011 Bay Citizen and Texas Tribune
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+.. _Github Issues: https://github.com/armstrong/armstrong/issues
 .. _pull request: http://help.github.com/pull-requests/
-.. _Fork it: http://help.github.com/forking/
+.. _Google Group: http://groups.google.com/group/armstrongcms
+
+
+State of Project
+----------------
+`Armstrong`_ is an open-source news platform that is freely available to any
+organization. It is the result of a collaboration between the `Texas Tribune`_
+and `The Center for Investigative Reporting`_ and a grant from the
+`John S. and James L. Knight Foundation`_. Armstrong is available as a
+complete bundle and as individual, stand-alone components.
+
+.. _Armstrong: http://www.armstrongcms.org/
+.. _Texas Tribune: http://www.texastribune.org/
+.. _The Center for Investigative Reporting: http://cironline.org/
+.. _John S. and James L. Knight Foundation: http://www.knightfoundation.org/
