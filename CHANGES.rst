@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-2.0 (unreleased)
+2.0.0 (2014-04-01)
 ------------------
 
 - **Backward incompatible:** ``env_settings.py`` is required and contains
