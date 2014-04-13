@@ -1,6 +1,4 @@
 import sys
-from os.path import dirname
-from contextlib import contextmanager
 
 try:
     from invoke import task, run
@@ -25,10 +23,12 @@ import json
 package = json.load(open("./package.json"))
 
 
-HELP_TEXT_MANAGEPY = 'any command that `manage.py` normally takes, including "help"'
+HELP_TEXT_MANAGEPY = \
+    'any command that `manage.py` normally takes, including "help"'
 HELP_TEXT_EXTRA = 'include any arguments this method can normally take. ' \
     'multiple args need quotes, e.g. --extra "test1 test2 --verbosity=2"'
-HELP_TEXT_REPORTS = 'directory to store coverage reports, default: "coverage"'
+HELP_TEXT_REPORTS = 'directory to store coverage reports. ' \
+    'default: "htmlcov" or whatever is set in .coveragerc'
 
 
 @decorator
@@ -58,30 +58,6 @@ def require_pip_module(module):
         else:
             return func(*args, **kwargs)
     return decorator(wrapper)
-
-
-@contextmanager
-def html_coverage_report(report_directory=None):
-    package_parent = str(package['name'].rsplit('.', 1)[0])  # fromlist can't handle unicode
-    module = __import__(package['name'], fromlist=[package_parent])
-    base_path = dirname(module.__file__)
-
-    settings = DjangoSettings()
-    omit = getattr(settings, 'COVERAGE_EXCLUDE_FILES', None)
-
-    import coverage as coverage_api
-    print("Coverage is covering: %s" % base_path)
-    cov = coverage_api.coverage(branch=True, source=[base_path], omit=omit)
-
-    cov.start()
-    yield
-    cov.stop()
-
-    # Write results
-    report_directory = report_directory or "coverage"
-    run('rm -rf ' + report_directory)
-    cov.html_report(directory=report_directory)
-    print("Coverage reports available in: %s " % report_directory)
 
 
 @task
@@ -116,7 +92,7 @@ def pep8():
 @require_self
 def test(extra=None):
     """Test this component via `manage.py test`"""
-    return managepy('test', extra)
+    managepy('test', extra)
 
 
 @task(help=dict(reportdir=HELP_TEXT_REPORTS, extra=HELP_TEXT_EXTRA))
@@ -125,11 +101,14 @@ def test(extra=None):
 def coverage(reportdir=None, extra=None):
     """Test this project with coverage reports"""
 
-    try:
-        with html_coverage_report(reportdir):
-            return test(extra)
-    except (ImportError, EnvironmentError):
-        sys.exit(1)
+    import coverage as coverage_api
+    cov = coverage_api.coverage()
+    opts = {'directory': reportdir} if reportdir else {}
+
+    cov.start()
+    test(extra)
+    cov.stop()
+    cov.html_report(**opts)
 
 
 @task(help=dict(cmd=HELP_TEXT_MANAGEPY, extra=HELP_TEXT_EXTRA))
@@ -164,7 +143,7 @@ def remove_armstrong():
     from pip.util import get_installed_distributions
     pkgs = get_installed_distributions(local_only=True, include_editables=True)
     apps = [pkg for pkg in pkgs
-        if pkg.key.startswith('armstrong') and pkg.key != 'armstrong.dev']
+            if pkg.key.startswith('armstrong') and pkg.key != 'armstrong.dev']
 
     for app in apps:
         run("pip uninstall -y %s" % app.key)

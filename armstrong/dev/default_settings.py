@@ -29,8 +29,6 @@ DATABASES = {
 }
 TEST_RUNNER = "armstrong.dev.tests.runner.ArmstrongDiscoverRunner"
 
-COVERAGE_EXCLUDE_FILES = ['*/migrations/*']
-
 # Add a DEBUG console "armstrong" logger
 LOGGING = {
     'version': 1,
