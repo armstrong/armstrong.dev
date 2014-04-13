@@ -1,5 +1,13 @@
 armstrong.dev
 =============
+
+.. image:: https://pypip.in/version/armstrong.dev/badge.png
+  :target: https://pypi.python.org/pypi/armstrong.dev/
+  :alt: PyPI Version
+.. image:: https://pypip.in/license/armstrong.dev/badge.png
+  :target: https://pypi.python.org/pypi/armstrong.dev/
+  :alt: License
+
 Tools and such for handling development of Armstrong applications
 
 This package contains some of the various helpers needed to do development work
