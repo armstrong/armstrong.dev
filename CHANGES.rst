@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+2.1.0 (unreleased)
+------------------
+
+- **Backward incompatible:** Drop the COVERAGE_EXCLUDE_FILES setting
+  introduced in 2.0. Better to use the more universal .coveragerc file.
+
+- Coverage task no longer sets branch, source and omit options. Not
+  duplicating those across Armstrong components was nice but using a
+  .coveragerc file is standard and will work more flexibly no matter
+  how Coverage is run.
+
 2.0.0 (2014-04-01)
 ------------------
 

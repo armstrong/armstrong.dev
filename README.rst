@@ -33,11 +33,6 @@ and Tox will complete ASAP.
 Many of the Invoke tasks have their own package requirements and they will
 nicely notify you if something they require needs to be installed.
 
-**Optional Settings:** (Used in ``env_settings.py``)
-
-``COVERAGE_EXCLUDE_FILES = ['*/migrations/*']``
-  A list of filename patterns for files to exclude during coverage testing.
-  Individual components are free to extend or replace this setting.
 
 .. _Invoke: http://docs.pyinvoke.org/en/latest/index.html
 
@@ -72,7 +67,8 @@ Two general rules: 1) enclose multiple args in quotes 2) kwargs need to use
 ``invoke coverage [--reportdir=<directory>] [--extra ...]``
   for running test coverage. --extra works the same as in "invoke test" passing
   arbitrary args to the underlying test command. --reportdir is where the HTML
-  report will be created; by default this directory is named "coverage".
+  report will be created; by default this directory is named "htmlcov" or
+  whatever is set in the ``.coveragerc`` file.
 
 ``invoke managepy <cmd> [--extra ...]``
   to run any Django "manage.py" command where --extra handles any arbitrary
