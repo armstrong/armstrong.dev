@@ -33,6 +33,8 @@ and Tox will complete ASAP.
 Many of the Invoke tasks have their own package requirements and they will
 nicely notify you if something they require needs to be installed.
 
+This component supports Django 1.3, 1.4, 1.5, 1.6, 1.7 on Python 2.6 and 2.7.
+
 
 .. _Invoke: http://docs.pyinvoke.org/en/latest/index.html
 

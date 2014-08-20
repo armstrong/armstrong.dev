@@ -4,6 +4,8 @@ CHANGES
 2.1.0 (unreleased)
 ------------------
 
+- Support for Django 1.7
+
 - **Backward incompatible:** Drop the COVERAGE_EXCLUDE_FILES setting
   introduced in 2.0. Better to use the more universal .coveragerc file.
 
@@ -19,6 +21,7 @@ CHANGES
   Still use the Django default, only now use the new Django 1.7 value. This will
   require updates to the env_settings.py of some Armstrong components but it
   only effects development and makes the required middleware more obvious.
+
 
 2.0.0 (2014-04-01)
 ------------------
