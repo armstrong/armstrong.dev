@@ -8,9 +8,6 @@ from this file.
     from armstrong.dev.default_settings import *
 
 """
-# Since we are using configure() we need to manually load the defaults
-from django.conf.global_settings import *
-
 # Grab our package information
 import json
 package = json.load(open("./package.json"))

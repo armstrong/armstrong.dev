@@ -38,6 +38,7 @@ class DjangoSettings(object):
     def load_settings():
         try:
             from django.conf import settings
+            from django.conf import global_settings
         except ImportError as e:
             raise ImportError(
                 "%s. Check to see if Django is installed in your "
@@ -59,7 +60,13 @@ class DjangoSettings(object):
 
         # Setup the Django environment
         if not settings.configured:
-            settings.configure(default_settings=package_settings)
+            # get our settings in the same way as django.conf.Settings
+            our_settings = {}
+            for s in dir(package_settings):
+                if s.isupper():
+                    our_settings[s] = getattr(package_settings, s)
+            settings.configure(
+                default_settings=global_settings, **our_settings)
 
         return settings
 
