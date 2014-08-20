@@ -24,6 +24,9 @@ DATABASES = {
         "NAME": 'mydatabase'
     }
 }
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware')
 TEST_RUNNER = "armstrong.dev.tests.runner.ArmstrongDiscoverRunner"
 
 # Add a DEBUG console "armstrong" logger
