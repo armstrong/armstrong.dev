@@ -12,6 +12,9 @@ CHANGES
   .coveragerc file is standard and will work more flexibly no matter
   how Coverage is run.
 
+- Update the South-based ``invoke create_migration`` to only work under Djangos
+  prior to 1.7 and otherwise direct to using native migrations.
+
 - Explicitly declare MIDDLEWARE_CLASSES to remove Django 1.7 change warning.
   Still use the Django default, only now use the new Django 1.7 value. This will
   require updates to the env_settings.py of some Armstrong components but it

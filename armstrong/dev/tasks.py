@@ -60,6 +60,20 @@ def require_pip_module(module):
     return decorator(wrapper)
 
 
+@decorator
+def replaced_by_django_migrations(func, *args, **kwargs):
+    """Decorator to preempt South requirement"""
+
+    DjangoSettings()  # trigger helpful messages if Django is missing
+
+    import django
+    if django.VERSION >= (1, 7):
+        print("Django 1.7+ has its own migrations system.")
+        print("Use this instead: `invoke managepy makemigrations`")
+        sys.exit(1)
+    return func(*args, **kwargs)
+
+
 @task
 def clean():
     """Find and remove all .pyc and .pyo files"""
@@ -68,6 +82,7 @@ def clean():
 
 @task
 @require_self
+@replaced_by_django_migrations
 @require_pip_module('south')
 def create_migration(initial=False):
     """Create a South migration for this project"""

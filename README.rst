@@ -76,8 +76,8 @@ Two general rules: 1) enclose multiple args in quotes 2) kwargs need to use
   ``invoke managepy runserver --extra 9001``
 
 ``invoke create_migration [--initial]``
-  to create a South migration for the component. An "auto" migration is
-  default if the --initial flag is not used.
+  to create a South migration for the component (in Django <1.7).
+  An "auto" migration is default if the --initial flag is not used.
 
 There are other commands as well, but these are the most useful. Remember
 that individual components may provide additional Invoke tasks as well. So
