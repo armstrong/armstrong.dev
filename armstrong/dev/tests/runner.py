@@ -1,6 +1,6 @@
 try:
     from django.test.runner import DiscoverRunner
-except ImportError:  # < Django 1.6
+except ImportError:  # DROP_WITH_DJANGO15
     from .utils.runner import DiscoverRunner
 
 

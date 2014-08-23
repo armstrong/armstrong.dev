@@ -2,7 +2,7 @@ from django.conf import settings, UserSettingsHolder
 from django.utils.functional import wraps
 
 
-# DEPRECATED remove when we drop Django 1.3 support
+# DROP_WITH_DJANGO13
 class override_settings(object):
     """
     Acts as either a decorator, or a context manager. If it's a decorator it

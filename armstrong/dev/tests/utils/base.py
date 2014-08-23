@@ -1,7 +1,7 @@
 from django.test import TestCase as DjangoTestCase
 from django.db import models
 
-# DEPRECATED remove when we drop Django 1.3 support
+# DROP_WITH_DJANGO13
 try:
     from django.test.utils import override_settings
 except ImportError:
@@ -20,7 +20,7 @@ class ArmstrongTestCase(DjangoTestCase):
             fudge.clear_expectations()
             fudge.clear_calls()
 
-    # DEPRECATED remove when we drop Django 1.3 support
+    # DROP_WITH_DJANGO13
     if not hasattr(DjangoTestCase, 'settings'):
         # backported from Django 1.4
         def settings(self, **kwargs):

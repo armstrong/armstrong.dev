@@ -1,4 +1,4 @@
-# DEPRECATED backport for Django < 1.6
+# DROP_WITH_DJANGO15
 
 import os
 from optparse import make_option
