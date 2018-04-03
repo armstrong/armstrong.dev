@@ -1,10 +1,10 @@
 armstrong.dev
 =============
 
-.. image:: https://pypip.in/version/armstrong.dev/badge.png
+.. image:: https://img.shields.io/pypi/v/armstrong.dev.svg
   :target: https://pypi.python.org/pypi/armstrong.dev/
   :alt: PyPI Version
-.. image:: https://pypip.in/license/armstrong.dev/badge.png
+.. image:: https://img.shields.io/pypi/l/armstrong.dev.svg
   :target: https://pypi.python.org/pypi/armstrong.dev/
   :alt: License
 
